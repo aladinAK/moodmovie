@@ -2,8 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'philosopher';
+  src: url('/public/fonts/philosopher.ttf') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
+/* Après vos styles existants */
+.custom-font {
+  font-family: 'philosopher';
+}
 
+@layer components {
+  .radial-bg {
+    background: radial-gradient(circle at center, #03094A 0%, #1E1E1E 100%);
+    color: white;
+  }
+}
+@layer utilities {
+  .shadow-glow {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  }
+}
 @layer base {
   :root {
 
@@ -116,6 +138,34 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply radial-bg text-foreground;
+  }
+}
+/* Après vos styles existants */
+
+@keyframes float1 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+
+@keyframes float2 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(-2deg); }
+}
+
+@keyframes float3 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+}
+
+@layer utilities {
+  .animate-float-1 {
+    animation: float1 6s ease-in-out infinite;
+  }
+  .animate-float-2 {
+    animation: float2 7s ease-in-out infinite 0.5s;
+  }
+  .animate-float-3 {
+    animation: float3 5s ease-in-out infinite 1s;
   }
 }
