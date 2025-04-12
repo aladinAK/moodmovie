@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: 'philosopher';
-  src: url('/public/fonts/philosopher.ttf') format('woff2');
+  src: url('/fonts/philosopher.ttf') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;

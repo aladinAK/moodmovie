@@ -51,57 +51,45 @@ export default function Home() {
   }, [selectedMood, isTransitioning])
 
   return (
-    <div className="min-h-screen py-10 px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Section titre et bulles d'humeur */}
-        <div className="relative h-[300px] flex items-center my-16">
-          {/* Titre central */}
-          <h1 className="custom-font text-7xl font-bold text-white z-10">
-            I&apos;WANT<br />TO
-            <span 
-              className={cn(
-                "text-6xl font-bold ml-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600",
-                "transition-all duration-800",
-                isTransitioning ? "opacity-0 scale-95" : "opacity-100 scale-100"
-              )}
-            >
-              {displayText}
-            </span>
-          </h1>
+<div className="min-h-screen py-10 px-4">
+  <div className="max-w-4xl mx-auto">
+    {/* Structure révisée pour le titre et les bulles */}
+    <div className="relative flex flex-col items-center my-10 max-sm:mt-0 max-sm:mb-6">
+      {/* Titre central */}
+      <h1 className="custom-font text-7xl max-sm:text-3xl text text-center font-bold text-white z-10 mb-5">
+        I&apos;WANT<br />TO
+        <span 
+          className={cn(
+            "text-6xl max-sm:text-3xl font-bold ml-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600",
+            "transition-all duration-800",
+            isTransitioning ? "opacity-0 scale-95" : "opacity-100 scale-100"
+          )}
+        >
+          {displayText}
+        </span>
+      </h1>
 
           {/* Bulles d'humeur */}
-          <div className="relative w-full h-[150px]">
-            {Object.entries(moodGenreMap).map(([mood], index) => {
-              const numberOfMoods = Object.keys(moodGenreMap).length;
-              
-              // Distribution horizontale équilibrée
-              const horizontalStep = 100 / (numberOfMoods + 1);
-              const horizontalPosition = (index + 1) * horizontalStep;
-              
-              // Variation verticale pour créer une ligne ondulée
-              const verticalVariations = [-20, 30, -10, 40, -30, 20];
-              const verticalOffset = verticalVariations[index % verticalVariations.length];
-              
-              // Animation pour chaque bulle
-              const animations = [
-                "animate-float-1",
-                "animate-float-2", 
-                "animate-float-3",
-              ];
-              
-              return (
-                <button
-                  key={mood}
-                  onClick={() => handleMoodSelect(mood)}
-                  style={{ 
-                    position: 'absolute',
-                    top: `calc(0% + ${verticalOffset}px)`, 
-                    left: `${horizontalPosition}%`,
-                    transform: 'translate(-50%, -50%)'
-                  }}
+            <div className=" w-full flex justify-center flex-wrap gap-3 items-center mt-8">
+              {Object.entries(moodGenreMap).map(([mood], index) => {
+                
+                // Animation pour chaque bulle
+                const animations = [
+                  "animate-float-1",
+                  "animate-float-2", 
+                  "animate-float-3",
+                ];
+                
+                return (
+                  <button
+                    key={mood}
+                    onClick={() => handleMoodSelect(mood)}
+                    style={{ 
+                     
+                    }}
                   className={cn(
                     // Classes de base pour toutes les bulles
-                    "backdrop-blur-md shadow-glow rounded-full w-20 h-20 md:w-24 md:h-24",
+                    "backdrop-blur-md shadow-glow rounded-full w-24 h-24",
                     "flex items-center justify-center text-center custom-font text-xs font-medium",
                     // Animation flottante
                     animations[index % animations.length],
@@ -135,7 +123,6 @@ export default function Home() {
             <TabsContent key={mood} value={mood} className="mt-0">
               <Card className="backdrop-blur-md bg-black/30 border-white/10">
                 <CardContent className="pt-6">
-                 
                   <MovieList genreId={genre.id} />
                 </CardContent>
               </Card>

@@ -26,17 +26,17 @@ interface WatchProvidersModalProps {
   onClose: () => void
 }
 
-// Liste des pays disponibles - seulement Canada et États-Unis
+// Available countries list - only Canada and United States
 const countries = [
   { code: "CA", name: "Canada" },
-  { code: "US", name: "États-Unis" },
+  { code: "US", name: "United States" },
 ]
 
 export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: WatchProvidersModalProps) {
   const [providers, setProviders] = useState<WatchProviders | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [country, setCountry] = useState("CA") // Canada par défaut
+  const [country, setCountry] = useState("CA") // Canada by default
 
   useEffect(() => {
     async function fetchProviders() {
@@ -56,12 +56,12 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
           setProviders(data.results[country])
         } else {
           const countryName = countries.find((c) => c.code === country)?.name || country
-          setError(`Aucun fournisseur disponible pour ce film au ${countryName}`)
+          setError(`No providers available for this movie in ${countryName}`)
           setProviders(null)
         }
       } catch (error) {
         console.error("Error fetching providers:", error)
-        setError("Erreur lors de la récupération des fournisseurs")
+        setError("Error retrieving providers")
         setProviders(null)
       } finally {
         setLoading(false)
@@ -93,10 +93,10 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
         </DialogHeader>
 
         <div className="mb-4">
-          <label className="text-sm font-medium mb-1 block">Pays</label>
+          <label className="text-sm font-medium mb-1 block">Country</label>
           <Select value={country} onValueChange={handleCountryChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Sélectionner un pays" />
+              <SelectValue placeholder="Select a country" />
             </SelectTrigger>
             <SelectContent>
               {countries.map((country) => (
@@ -123,7 +123,7 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
           </div>
         ) : !hasProviders ? (
           <div className="py-6 text-center text-muted-foreground">
-            <p>Aucun fournisseur disponible pour ce film au {countryName}</p>
+            <p>No providers available for this movie in {countryName}</p>
           </div>
         ) : (
           <Tabs defaultValue="flatrate" className="w-full">
@@ -132,16 +132,16 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
                 Streaming
               </TabsTrigger>
               <TabsTrigger value="rent" disabled={!providers?.rent?.length}>
-                Location
+                Rental
               </TabsTrigger>
               <TabsTrigger value="buy" disabled={!providers?.buy?.length}>
-                Achat
+                Purchase
               </TabsTrigger>
             </TabsList>
 
             {providers?.flatrate && providers.flatrate.length > 0 && (
               <TabsContent value="flatrate" className="py-4">
-                <h3 className="mb-3 font-medium">Disponible en streaming sur :</h3>
+                <h3 className="mb-3 font-medium">Available for streaming on:</h3>
                 <div className="flex flex-wrap gap-3">
                   {providers.flatrate.map((provider) => (
                     <div key={provider.provider_id} className="text-center">
@@ -162,7 +162,7 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
 
             {providers?.rent && providers.rent.length > 0 && (
               <TabsContent value="rent" className="py-4">
-                <h3 className="mb-3 font-medium">Disponible en location sur :</h3>
+                <h3 className="mb-3 font-medium">Available for rental on:</h3>
                 <div className="flex flex-wrap gap-3">
                   {providers.rent.map((provider) => (
                     <div key={provider.provider_id} className="text-center">
@@ -183,7 +183,7 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
 
             {providers?.buy && providers.buy.length > 0 && (
               <TabsContent value="buy" className="py-4">
-                <h3 className="mb-3 font-medium">Disponible à l'achat sur :</h3>
+                <h3 className="mb-3 font-medium">Available for purchase on:</h3>
                 <div className="flex flex-wrap gap-3">
                   {providers.buy.map((provider) => (
                     <div key={provider.provider_id} className="text-center">
@@ -207,4 +207,3 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
     </Dialog>
   )
 }
-

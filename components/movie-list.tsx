@@ -111,8 +111,7 @@ export function MovieList({ genreId }: MovieListProps) {
       <div className="space-y-6">
         <div className="flex justify-end">
           <Button variant="outline" disabled className="gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Nouvelle sélection
+            <RefreshCw className="h-4 w-4 stroke-white hover:stroke-black" />
           </Button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -136,8 +135,7 @@ export function MovieList({ genreId }: MovieListProps) {
       <div className="space-y-6">
         <div className="flex justify-end">
           <Button variant="outline" onClick={handleRefresh} className="gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Nouvelle sélection
+            <RefreshCw className="h-4 w-4 stroke-white hover:stroke-black" />
           </Button>
         </div>
         <div className="text-center py-10">
@@ -151,35 +149,37 @@ export function MovieList({ genreId }: MovieListProps) {
     <div className="space-y-6">
       <div className="flex justify-end">
         <Button variant="outline" onClick={handleRefresh} className="gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Nouvelle sélection
+          <RefreshCw className="h-4 w-4 stroke-white hover:stroke-black" />
         </Button>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
   {movies.map((movie, index) => (
-    <Card
-      key={movie.id}
-      className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-      onClick={() => handleMovieClick(movie)}
-    >
-     <div className="relative aspect-[2/3] w-full">
-  <Image
-    src={
-      movie.poster_path
-        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-        : "/placeholder.svg?height=300&width=200"
-    }
-    alt={movie.title}
-    fill
-    sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
-    className="object-cover"
-    priority={index < 5} // Augmentez le nombre d'images prioritaires à 5
-    loading={index >= 5 ? "lazy" : undefined}
-  />
-</div>
+   <Card
+   key={movie.id}
+   className="overflow-hidden cursor-pointer bg-black/20 border-white/5
+              transition-all duration-300 ease-out 
+              transform hover:scale-[1.03] hover:shadow-[0_10px_40px_rgba(0,0,0,0.3)]
+              hover:border-white/20 hover:bg-black/30"
+   onClick={() => handleMovieClick(movie)}
+ >
+   <div className="relative aspect-[2/3] w-full overflow-hidden">
+        <Image
+        src={
+          movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            : "https://placehold.co/300x450/1E1E1E/FFFFFF?text=No+Image"  // Alternative en ligne
+        }
+        alt={movie.title}
+        fill
+        sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
+        className="object-cover transition-transform duration-500 hover:scale-110"
+        priority={index < 5}
+        loading={index >= 5 ? "lazy" : undefined}
+      />
+   </div>
       <CardContent className="p-4">
-        <h3 className="font-medium line-clamp-1">{movie.title}</h3>
-        <div className="flex items-center justify-between mt-2 text-sm text-muted-foreground">
+        <h3 className="font-medium text-white line-clamp-1">{movie.title}</h3>
+        <div className="flex items-center justify-between mt-2 text-sm text-white/70">
           <span>{movie.release_date?.split("-")[0] || "N/A"}</span>
           <div className="flex items-center">
             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
