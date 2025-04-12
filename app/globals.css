@@ -27,6 +27,9 @@
   }
 }
 @layer base {
+  body {
+    @apply radial-bg text-foreground;
+  }
   :root {
 
     --background: 0 0% 100%;
@@ -168,4 +171,53 @@
   .animate-float-3 {
     animation: float3 5s ease-in-out infinite 1s;
   }
+}
+/* Ajoutez ces classes après vos classes .radial-bg existantes */
+
+/* Couleurs de fond par humeur */
+.radial-bg-joy {
+  background: radial-gradient(circle at center, #FFB347 0%, #131313 100%);
+  color: white;
+}
+
+.radial-bg-sadness {
+  background: radial-gradient(circle at center, #1E3A8A 0%, #0F172A 100%);
+  color: white;
+}
+
+.radial-bg-disgust {
+  background: radial-gradient(circle at center, #166534 0%, #0F1F17 100%);
+  color: white;
+}
+
+.radial-bg-fear {
+  background: radial-gradient(circle at center, #4C1D95 0%, #110E1A 100%);
+  color: white;
+}
+
+.radial-bg-anger {
+  background: radial-gradient(circle at center, #991B1B 0%, #1B0F0F 100%);
+  color: white;
+}
+
+.radial-bg-surprise {
+  background: radial-gradient(circle at center, #0F766E 0%, #0C1516 100%);
+  color: white;
+}
+
+/* Transition douce pour le changement de fond */
+body {
+  transition: background 1.5s ease-in-out;
+}
+@keyframes subtle-pulse {
+  0%, 100% {
+    transform: scale(1.35);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+}
+
+.animate-subtle-pulse {
+  animation: subtle-pulse 5s ease-in-out infinite;
 }

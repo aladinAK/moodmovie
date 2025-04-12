@@ -113,11 +113,11 @@ export function MovieList({ genreId }: MovieListProps) {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex justify-end">
-          <Button variant="outline" disabled className="gap-2">
-            <RefreshCw className="h-4 w-4 stroke-white hover:stroke-black" />
-          </Button>
-        </div>
+         <div className="sticky top-4 z-30 flex justify-end mb-4">
+      <Button variant="outline" disabled className="gap-2 bg-black/40 backdrop-blur-sm">
+        <RefreshCw className="h-4 w-4 stroke-white hover:stroke-black" />
+      </Button>
+    </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
   {[...Array(10)].map((_, i) => (
     <Card key={i} className="overflow-hidden bg-black/20 border border-white/5">
@@ -142,11 +142,11 @@ export function MovieList({ genreId }: MovieListProps) {
   if (movies.length === 0 && !loading) {
     return (
       <div className="space-y-6">
-        <div className="flex justify-end">
-          <Button variant="outline" onClick={handleRefresh} className="gap-2">
-            <RefreshCw className="h-4 w-4 stroke-white hover:stroke-black" />
-          </Button>
-        </div>
+        <div className="sticky top-4 z-30 flex justify-end mb-4">
+      <Button variant="outline" disabled className="gap-2 bg-black/40 backdrop-blur-sm">
+        <RefreshCw className="h-4 w-4 stroke-white hover:stroke-black" />
+      </Button>
+    </div>
         <div className="text-center py-10">
         <p className="text-muted-foreground">No movies found 😔.</p>
         </div>
@@ -155,14 +155,22 @@ export function MovieList({ genreId }: MovieListProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-end">
-        <Button variant="outline" onClick={handleRefresh} className="gap-2">
+    <div className="space-y-6 relative">
+      {/* Container sticky pour le bouton de rafraîchissement */}
+      <div className="sticky top-4 z-30 flex justify-end mb-4">
+        <Button 
+          variant="outline" 
+          onClick={handleRefresh} 
+          className="max-md:p-3 rounded-full gap-2 bg-black/40 backdrop-blur-sm border-white/20 shadow-lg hover:bg-white/10"
+          title="more movies"
+        >
           <RefreshCw className="h-4 w-4 stroke-white hover:stroke-black" />
         </Button>
       </div>
+      
+      {/* Contenu existant - grille de films */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-  {movies.map((movie, index) => (
+        {movies.map((movie, index) => (
    <Card
    key={movie.id}
    className="overflow-hidden cursor-pointer bg-black/20 border-white/5
