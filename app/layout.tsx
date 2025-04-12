@@ -23,6 +23,7 @@ export const viewport: Viewport = {
   ],
 };
 export const metadata: Metadata = {
+  metadataBase: new URL('https://moodmovie.ca'),
   // SEO de base
   title: "MoodMovie - Films based on your mood",
  description: "Discover movies that match your current state of mind. Find films for any emotion: joy, sadness, fear, anger, or surprise.",
