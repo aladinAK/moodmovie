@@ -25,7 +25,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   // SEO de base
   title: "MoodMovie - Films based on your mood",
-  description: "Discover movies that match your current state of mind. Find perfect films for any emotion: joy, sadness, fear, anger, surprise, or disgust.",
+ description: "Discover movies that match your current state of mind. Find films for any emotion: joy, sadness, fear, anger, or surprise.",
   
   // Contrôle des robots
   robots: {
@@ -57,10 +57,10 @@ export const metadata: Metadata = {
     siteName: 'MoodMovie',
     images: [
       {
-        url: 'https://moodmovie.ca/og-image.jpg',
+        url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'MoodMovie Preview',
+        alt: 'MoodMovie - Films based on your mood',
       },
     ],
   },
@@ -70,8 +70,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'MoodMovie - Films based on your mood',
     description: 'Discover movies that match your current state of mind',
-    images: ['https://moodmovie.ca/twitter-image.jpg'],
-    creator: '@yourtwitterhandle',
+    images: ['/og-image.jpg'],
+    creator: 'aladinakkari.ca',
   },
   
   // Mots-clés (encore utilisés par certains moteurs)
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
   // Icônes (favicons)
   icons: {
     icon: '/favicon.ico',
-    shortcut: '/.favicon-16x16.png',
+    shortcut: '/favicon-16x16.png',
     apple: '/apple-touch-icon.png',
     other: [
       {

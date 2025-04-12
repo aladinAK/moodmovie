@@ -74,7 +74,11 @@ export function MovieList({ genreId }: MovieListProps) {
     } catch (error) {
       console.error("Error fetching movies:", error)
       setMovies([])
-    } finally {
+      // Essayer une autre page si la première échoue
+      if (pageNumber < 2) {
+        fetchMovies(Math.floor(Math.random() * 5) + 1)
+      }
+    }  finally {
       setLoading(false)
     }
   }, [genreId])
@@ -144,7 +148,7 @@ export function MovieList({ genreId }: MovieListProps) {
           </Button>
         </div>
         <div className="text-center py-10">
-          <p className="text-muted-foreground">Aucun film trouvé. Veuillez vérifier votre clé API TMDB.</p>
+        <p className="text-muted-foreground">No movies found 😔.</p>
         </div>
       </div>
     )

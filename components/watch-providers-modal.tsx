@@ -44,20 +44,18 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
   // Fonction qui génère l'URL de redirection en fonction du fournisseur
   const getProviderURL = (providerId: number, baseURL: string) => {
     // Ces mappings sont basés sur les IDs communs des fournisseurs
-    const providerURLs: Record<number, string> = {
-      8: "https://www.netflix.com", // Netflix
-      9: "https://www.primevideo.com", // Amazon Prime
-      337: "https://www.disneyplus.com", // Disney+
-      2: "https://www.apple.com/apple-tv-plus", // Apple TV+
-      15: "https://www.hulu.com", // Hulu
-      1899: "https://max.com", // Max (ancien HBO Max)
-      283: "https://www.peacocktv.com", // Peacock
-      350: "https://www.appletv.com", // Apple TV
-      3: "https://tv.google.com", // Google Play Movies
-      10: "https://www.youtube.com", // YouTube Premium
-      531: "https://www.paramountplus.com", // Paramount+
-      // Ajoutez d'autres fournisseurs selon les besoins
-    };
+    // Ajouter plus de fournisseurs canadiens/français
+const providerURLs: Record<number, string> = {
+  8: "https://www.netflix.com", // Netflix
+  9: "https://www.primevideo.com", // Amazon Prime
+  337: "https://www.disneyplus.com", // Disney+
+  2: "https://www.apple.com/apple-tv-plus", // Apple TV+
+  348: "https://www.crunchyroll.com", // Crunchyroll
+  119: "https://www.amazonstudiosguilds.com", // Amazon Prime Video
+  309: "https://crave.ca", // Crave
+  230: "https://www.canalplus.com", // Canal+
+  // Autres fournisseurs pertinents pour le Canada/France
+};
     
     // Si nous avons une URL spécifique pour ce fournisseur, utilisez-la
     if (providerURLs[providerId]) {

@@ -57,7 +57,7 @@ export default function Home() {
     <div className="relative flex flex-col items-center my-10 max-sm:mt-0 max-sm:mb-6">
       {/* Titre central */}
       <h1 className="custom-font text-7xl max-sm:text-3xl text text-center font-bold text-white z-10 mb-5">
-        I&apos;WANT<br />TO
+        I WANT<br />TO
         <span 
           className={cn(
             "text-6xl max-sm:text-3xl font-bold ml-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600",

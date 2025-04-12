@@ -3,13 +3,6 @@
 
 /** @type {import('tailwindcss').Config} */
 const config = {
-	images: {
-		domains: ['image.tmdb.org'],
-		// Désactiver le cache d'images pendant le développement
-		disableStaticImages: process.env.NODE_ENV === 'development',
-		// Désactiver la mise en cache locale
-		minimumCacheTTL: 0
-	  },
   darkMode: ["class"],
   content: [
 	"./pages/**/*.{js,ts,jsx,tsx,mdx}",
