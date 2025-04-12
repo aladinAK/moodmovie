@@ -6,17 +6,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ExternalLink } from "lucide-react"
 
 interface Provider {
   provider_id: number
   provider_name: string
   logo_path: string
+  provider_url?: string // Ajout du champ d'URL
 }
 
 interface WatchProviders {
   flatrate?: Provider[]
   rent?: Provider[]
   buy?: Provider[]
+  link?: string // URL de base pour le pays
 }
 
 interface WatchProvidersModalProps {
@@ -38,6 +41,33 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
   const [error, setError] = useState<string | null>(null)
   const [country, setCountry] = useState("CA") // Canada by default
 
+  // Fonction qui génère l'URL de redirection en fonction du fournisseur
+  const getProviderURL = (providerId: number, baseURL: string) => {
+    // Ces mappings sont basés sur les IDs communs des fournisseurs
+    const providerURLs: Record<number, string> = {
+      8: "https://www.netflix.com", // Netflix
+      9: "https://www.primevideo.com", // Amazon Prime
+      337: "https://www.disneyplus.com", // Disney+
+      2: "https://www.apple.com/apple-tv-plus", // Apple TV+
+      15: "https://www.hulu.com", // Hulu
+      1899: "https://max.com", // Max (ancien HBO Max)
+      283: "https://www.peacocktv.com", // Peacock
+      350: "https://www.appletv.com", // Apple TV
+      3: "https://tv.google.com", // Google Play Movies
+      10: "https://www.youtube.com", // YouTube Premium
+      531: "https://www.paramountplus.com", // Paramount+
+      // Ajoutez d'autres fournisseurs selon les besoins
+    };
+    
+    // Si nous avons une URL spécifique pour ce fournisseur, utilisez-la
+    if (providerURLs[providerId]) {
+      return providerURLs[providerId];
+    }
+    
+    // Sinon, utilisez l'URL de base de TMDB
+    return baseURL || "https://www.themoviedb.org";
+  }
+
   useEffect(() => {
     async function fetchProviders() {
       if (!movieId) return
@@ -53,7 +83,33 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
           setError(data.error)
           setProviders(null)
         } else if (data.results && data.results[country]) {
-          setProviders(data.results[country])
+          // Récupérer les données du fournisseur avec l'URL de base
+          const providerData = {...data.results[country]}
+          const baseURL = data.results[country].link || "";
+          
+          // Ajouter l'URL à chaque fournisseur
+          if (providerData.flatrate) {
+            providerData.flatrate = providerData.flatrate.map(provider => ({
+              ...provider,
+              provider_url: getProviderURL(provider.provider_id, baseURL)
+            }))
+          }
+          
+          if (providerData.rent) {
+            providerData.rent = providerData.rent.map(provider => ({
+              ...provider,
+              provider_url: getProviderURL(provider.provider_id, baseURL)
+            }))
+          }
+          
+          if (providerData.buy) {
+            providerData.buy = providerData.buy.map(provider => ({
+              ...provider,
+              provider_url: getProviderURL(provider.provider_id, baseURL)
+            }))
+          }
+          
+          setProviders(providerData)
         } else {
           const countryName = countries.find((c) => c.code === country)?.name || country
           setError(`No providers available for this movie in ${countryName}`)
@@ -144,17 +200,26 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
                 <h3 className="mb-3 font-medium">Available for streaming on:</h3>
                 <div className="flex flex-wrap gap-3">
                   {providers.flatrate.map((provider) => (
-                    <div key={provider.provider_id} className="text-center">
-                      <div className="relative h-16 w-16 overflow-hidden rounded-md border">
+                    <a 
+                      key={provider.provider_id} 
+                      href={provider.provider_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-center transition-transform hover:scale-105 group"
+                    >
+                      <div className="relative h-16 w-16 overflow-hidden rounded-md border group-hover:border-white/50">
                         <Image
                           src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
                           alt={provider.provider_name}
                           fill
                           className="object-cover"
                         />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <ExternalLink className="w-4 h-4 text-white" />
+                        </div>
                       </div>
-                      <p className="mt-1 text-xs">{provider.provider_name}</p>
-                    </div>
+                      <p className="mt-1 text-xs group-hover:text-white">{provider.provider_name}</p>
+                    </a>
                   ))}
                 </div>
               </TabsContent>
@@ -165,17 +230,26 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
                 <h3 className="mb-3 font-medium">Available for rental on:</h3>
                 <div className="flex flex-wrap gap-3">
                   {providers.rent.map((provider) => (
-                    <div key={provider.provider_id} className="text-center">
-                      <div className="relative h-16 w-16 overflow-hidden rounded-md border">
+                    <a 
+                      key={provider.provider_id} 
+                      href={provider.provider_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-center transition-transform hover:scale-105 group"
+                    >
+                      <div className="relative h-16 w-16 overflow-hidden rounded-md border group-hover:border-white/50">
                         <Image
                           src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
                           alt={provider.provider_name}
                           fill
                           className="object-cover"
                         />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <ExternalLink className="w-4 h-4 text-white" />
+                        </div>
                       </div>
-                      <p className="mt-1 text-xs">{provider.provider_name}</p>
-                    </div>
+                      <p className="mt-1 text-xs group-hover:text-white">{provider.provider_name}</p>
+                    </a>
                   ))}
                 </div>
               </TabsContent>
@@ -186,17 +260,26 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
                 <h3 className="mb-3 font-medium">Available for purchase on:</h3>
                 <div className="flex flex-wrap gap-3">
                   {providers.buy.map((provider) => (
-                    <div key={provider.provider_id} className="text-center">
-                      <div className="relative h-16 w-16 overflow-hidden rounded-md border">
+                    <a 
+                      key={provider.provider_id} 
+                      href={provider.provider_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-center transition-transform hover:scale-105 group"
+                    >
+                      <div className="relative h-16 w-16 overflow-hidden rounded-md border group-hover:border-white/50">
                         <Image
                           src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
                           alt={provider.provider_name}
                           fill
                           className="object-cover"
                         />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <ExternalLink className="w-4 h-4 text-white" />
+                        </div>
                       </div>
-                      <p className="mt-1 text-xs">{provider.provider_name}</p>
-                    </div>
+                      <p className="mt-1 text-xs group-hover:text-white">{provider.provider_name}</p>
+                    </a>
                   ))}
                 </div>
               </TabsContent>

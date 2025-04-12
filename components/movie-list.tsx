@@ -115,16 +115,21 @@ export function MovieList({ genreId }: MovieListProps) {
           </Button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {[...Array(10)].map((_, i) => (
-            <Card key={i} className="overflow-hidden">
-              <Skeleton className="h-[225px] w-full" />
-              <CardContent className="p-4">
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-2/3" />
-              </CardContent>
-            </Card>
-          ))}
+  {[...Array(10)].map((_, i) => (
+    <Card key={i} className="overflow-hidden bg-black/20 border border-white/5">
+      <div className="relative aspect-[2/3] w-full">
+        <Skeleton className="absolute inset-0 bg-white/15" />
+      </div>
+      <CardContent className="p-4">
+        <Skeleton className="h-4 w-full mb-2 bg-white/15" />
+        <div className="flex items-center justify-between mt-2">
+          <Skeleton className="h-3 w-10 bg-white/15" />
+          <Skeleton className="h-3 w-16 bg-white/15" />
         </div>
+      </CardContent>
+    </Card>
+  ))}
+</div>
       </div>
     )
   }
@@ -167,7 +172,7 @@ export function MovieList({ genreId }: MovieListProps) {
         src={
           movie.poster_path
             ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-            : "https://placehold.co/300x450/1E1E1E/FFFFFF?text=No+Image"  // Alternative en ligne
+            : "/no-image.png"
         }
         alt={movie.title}
         fill
