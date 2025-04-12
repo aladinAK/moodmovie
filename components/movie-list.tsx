@@ -200,14 +200,15 @@ export function MovieList({ genreId }: MovieListProps) {
   ))}
 </div>
 
-      {selectedMovie && (
-        <WatchProvidersModal
-          movieId={selectedMovie.id}
-          movieTitle={selectedMovie.title}
-          isOpen={isModalOpen}
-          onClose={closeModal}
-        />
-      )}
+{selectedMovie && (
+  <WatchProvidersModal
+    movieId={selectedMovie.id}
+    movieTitle={selectedMovie.title}
+    movieOverview={selectedMovie.overview} // Ajoutez cette ligne
+    isOpen={isModalOpen}
+    onClose={closeModal}
+  />
+)}
     </div>
   )
 }

@@ -25,6 +25,7 @@ interface WatchProviders {
 interface WatchProvidersModalProps {
   movieId: number | null
   movieTitle: string
+  movieOverview?: string  // Ajout du champ pour la synopsis
   isOpen: boolean
   onClose: () => void
 }
@@ -35,7 +36,7 @@ const countries = [
   { code: "US", name: "United States" },
 ]
 
-export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: WatchProvidersModalProps) {
+export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen, onClose }: WatchProvidersModalProps) {
   const [providers, setProviders] = useState<WatchProviders | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -45,17 +46,17 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
   const getProviderURL = (providerId: number, baseURL: string) => {
     // Ces mappings sont basés sur les IDs communs des fournisseurs
     // Ajouter plus de fournisseurs canadiens/français
-const providerURLs: Record<number, string> = {
-  8: "https://www.netflix.com", // Netflix
-  9: "https://www.primevideo.com", // Amazon Prime
-  337: "https://www.disneyplus.com", // Disney+
-  2: "https://www.apple.com/apple-tv-plus", // Apple TV+
-  348: "https://www.crunchyroll.com", // Crunchyroll
-  119: "https://www.amazonstudiosguilds.com", // Amazon Prime Video
-  309: "https://crave.ca", // Crave
-  230: "https://www.canalplus.com", // Canal+
-  // Autres fournisseurs pertinents pour le Canada/France
-};
+    const providerURLs: Record<number, string> = {
+      8: "https://www.netflix.com", // Netflix
+      9: "https://www.primevideo.com", // Amazon Prime
+      337: "https://www.disneyplus.com", // Disney+
+      2: "https://www.apple.com/apple-tv-plus", // Apple TV+
+      348: "https://www.crunchyroll.com", // Crunchyroll
+      119: "https://www.amazonstudiosguilds.com", // Amazon Prime Video
+      309: "https://crave.ca", // Crave
+      230: "https://www.canalplus.com", // Canal+
+      // Autres fournisseurs pertinents pour le Canada/France
+    };
     
     // Si nous avons une URL spécifique pour ce fournisseur, utilisez-la
     if (providerURLs[providerId]) {
@@ -147,6 +148,13 @@ const providerURLs: Record<number, string> = {
           <DialogDescription className="text-muted-foreground text-sm">
             Find where to watch this movie online
           </DialogDescription>
+          
+          {/* Synopsis du film */}
+          {movieOverview && (
+            <div className="mt-3 text-sm text-white/80 border-t border-white/10 pt-3">
+              <p className="line-clamp-4">{movieOverview}</p>
+            </div>
+          )}
         </DialogHeader>
 
         <div className="mb-4">
@@ -219,7 +227,7 @@ const providerURLs: Record<number, string> = {
                           <ExternalLink className="w-4 h-4 text-white" />
                         </div>
                       </div>
-                      <p className="mt-1 text-xs group-hover:text-white">{provider.provider_name}</p>
+                     
                     </a>
                   ))}
                 </div>
@@ -249,7 +257,7 @@ const providerURLs: Record<number, string> = {
                           <ExternalLink className="w-4 h-4 text-white" />
                         </div>
                       </div>
-                      <p className="mt-1 text-xs group-hover:text-white">{provider.provider_name}</p>
+                     
                     </a>
                   ))}
                 </div>
@@ -279,7 +287,7 @@ const providerURLs: Record<number, string> = {
                           <ExternalLink className="w-4 h-4 text-white" />
                         </div>
                       </div>
-                      <p className="mt-1 text-xs group-hover:text-white">{provider.provider_name}</p>
+                     
                     </a>
                   ))}
                 </div>
