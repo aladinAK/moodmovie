@@ -217,12 +217,13 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
                       className="text-center transition-transform hover:scale-105 group"
                     >
                       <div className="relative h-16 w-16 overflow-hidden rounded-md border group-hover:border-white/50">
-                        <Image
-                          src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-                          alt={provider.provider_name}
-                          fill
-                          className="object-cover"
-                        />
+                      <Image
+  src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+  alt={provider.provider_name}
+  fill
+  sizes="64px" // Taille fixe car les logos sont dans des conteneurs de 16x16
+  className="object-cover"
+/>
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <ExternalLink className="w-4 h-4 text-white" />
                         </div>
@@ -247,12 +248,13 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
                       className="text-center transition-transform hover:scale-105 group"
                     >
                       <div className="relative h-16 w-16 overflow-hidden rounded-md border group-hover:border-white/50">
-                        <Image
-                          src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-                          alt={provider.provider_name}
-                          fill
-                          className="object-cover"
-                        />
+                      <Image
+  src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+  alt={provider.provider_name}
+  fill
+  sizes="64px" // Taille fixe car les logos sont dans des conteneurs de 16x16
+  className="object-cover"
+/>
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <ExternalLink className="w-4 h-4 text-white" />
                         </div>
@@ -277,12 +279,13 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
                       className="text-center transition-transform hover:scale-105 group"
                     >
                       <div className="relative h-16 w-16 overflow-hidden rounded-md border group-hover:border-white/50">
-                        <Image
-                          src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-                          alt={provider.provider_name}
-                          fill
-                          className="object-cover"
-                        />
+                      <Image
+  src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+  alt={provider.provider_name}
+  fill
+  sizes="64px" // Taille fixe car les logos sont dans des conteneurs de 16x16
+  className="object-cover"
+/>
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <ExternalLink className="w-4 h-4 text-white" />
                         </div>
