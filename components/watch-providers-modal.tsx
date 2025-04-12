@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -12,14 +12,14 @@ interface Provider {
   provider_id: number
   provider_name: string
   logo_path: string
-  provider_url?: string // Ajout du champ d'URL
+  provider_url?: string
 }
 
 interface WatchProviders {
   flatrate?: Provider[]
   rent?: Provider[]
   buy?: Provider[]
-  link?: string // URL de base pour le pays
+  link?: string
 }
 
 interface WatchProvidersModalProps {
@@ -146,6 +146,9 @@ export function WatchProvidersModal({ movieId, movieTitle, isOpen, onClose }: Wa
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl">{movieTitle}</DialogTitle>
+          <DialogDescription className="text-muted-foreground text-sm">
+            Find where to watch this movie online
+          </DialogDescription>
         </DialogHeader>
 
         <div className="mb-4">
