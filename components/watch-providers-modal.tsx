@@ -88,21 +88,21 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
           
           // Ajouter l'URL à chaque fournisseur
           if (providerData.flatrate) {
-            providerData.flatrate = providerData.flatrate.map(provider => ({
+            providerData.flatrate = providerData.flatrate.map((provider: Provider) => ({
               ...provider,
               provider_url: getProviderURL(provider.provider_id, baseURL)
             }))
           }
           
           if (providerData.rent) {
-            providerData.rent = providerData.rent.map(provider => ({
+            providerData.rent = providerData.rent.map((provider: Provider) => ({
               ...provider,
               provider_url: getProviderURL(provider.provider_id, baseURL)
             }))
           }
           
           if (providerData.buy) {
-            providerData.buy = providerData.buy.map(provider => ({
+            providerData.buy = providerData.buy.map((provider: Provider) => ({
               ...provider,
               provider_url: getProviderURL(provider.provider_id, baseURL)
             }))
