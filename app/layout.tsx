@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ScrollToTop } from "@/components/scroll-to-top"
 import { AnimatedBackground } from "@/components/animated-background"
+import { Analytics } from "@vercel/analytics/react"
 
 import "./globals.css";
 
@@ -139,6 +140,7 @@ export default function RootLayout({
         </main>
         <ScrollToTop />
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
