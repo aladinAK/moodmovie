@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ScrollToTop } from "@/components/scroll-to-top"
 import { AnimatedBackground } from "@/components/animated-background"
 import { Analytics } from "@vercel/analytics/react"
+import { FavoritesProvider } from '@/context/favorites-context'
+
 
 import "./globals.css";
 
@@ -134,6 +136,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} radial-bg antialiased min-h-screen flex flex-col`}
       >
+        <FavoritesProvider>
         <AnimatedBackground />
         <main className="flex-1">
           {children}
@@ -141,6 +144,7 @@ export default function RootLayout({
         <ScrollToTop />
         <Footer />
         <Analytics />
+        </FavoritesProvider>
       </body>
     </html>
   );

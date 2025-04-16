@@ -5,6 +5,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { MovieList } from "@/components/movie-list"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Heart } from "lucide-react"
+import { FavoritesModal } from "@/components/favorites-modal"
 
 // Map moods to genres
 const moodGenreMap = {
@@ -32,6 +35,7 @@ export default function Home() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
   const [displayText, setDisplayText] = useState(moodTextMap.default)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false)
 
   const handleMoodSelect = (mood: string) => {
     if (mood !== selectedMood && !isTransitioning) {
@@ -80,6 +84,19 @@ export default function Home() {
   return (
     <div className="min-h-screen py-10 px-4">
       <div className="max-w-4xl mx-auto">
+        {/* Bouton d'accès aux favoris - modifié pour ouvrir le modal */}
+        <div className="flex justify-end mb-4">
+          <Button 
+            variant="outline" 
+            className="gap-2 px-4 bg-black/40 backdrop-blur-sm border-white/20 rounded-full hover:text-white hover:bg-black/60"
+            title="Mes favoris"
+            onClick={() => setIsFavoritesModalOpen(true)}
+          >
+            <Heart className="h-4 w-4" />
+            <span className="max-sm:hidden">Favorites</span>
+          </Button>
+        </div>
+
         <div className="relative flex flex-col items-center my-10 max-sm:mt-0 max-sm:mb-6">
           <h1 className="custom-font text-7xl max-sm:text-3xl text-center font-bold text-white z-10 mb-5">
             I WANT TO <br />
@@ -155,6 +172,12 @@ export default function Home() {
             </CardContent>
           </Card>
         )}
+        
+        {/* Modal des favoris */}
+        <FavoritesModal 
+          isOpen={isFavoritesModalOpen} 
+          onClose={() => setIsFavoritesModalOpen(false)} 
+        />
       </div>
     </div>
   )
