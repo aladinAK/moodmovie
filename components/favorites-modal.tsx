@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Star, Heart, X, Trash2 } from "lucide-react"
+import { Star, Heart, Trash2 } from "lucide-react"
 import { useFavorites } from "@/context/favorites-context"
 import { WatchProvidersModal } from "./watch-providers-modal"
 import { Movie } from "@/types/movie"
