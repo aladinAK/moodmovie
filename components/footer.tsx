@@ -10,7 +10,7 @@ export function Footer() {
             Aladinakkari
           </a>
         </div>
-        <div className=" text-center text-[3px] text-muted-foreground">
+        <div className=" text-center text-[7px] text-muted-foreground">
           <a  href="https://www.themoviedb.org" 
             target="_blank" >
             This site uses the TMDB API but is not endorsed or certified by TMDB.

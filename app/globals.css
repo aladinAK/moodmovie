@@ -25,6 +25,14 @@
   .shadow-glow {
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
   }
+  
+  .line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 }
 @layer base {
   body {

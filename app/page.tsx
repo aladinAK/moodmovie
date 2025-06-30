@@ -4,9 +4,10 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { MovieList } from "@/components/movie-list"
+import { BookList } from "@/components/book-list"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Heart } from "lucide-react"
+import { Heart, Film, BookOpen } from "lucide-react"
 import { FavoritesModal } from "@/components/favorites-modal"
 
 // Map moods to genres
@@ -17,6 +18,16 @@ const moodGenreMap = {
   fear: { id: 53, name: "Thriller" },
   anger: { id: 28, name: "Action" },
   surprise: { id: 9648, name: "Mystère" },
+}
+
+// Map moods to book subjects
+const moodBookMap = {
+  joy: { subject: "humor", name: "Humour" },
+  sadness: { subject: "drama", name: "Drame" },
+  disgust: { subject: "horror", name: "Horreur" },
+  fear: { subject: "thriller", name: "Thriller" },
+  anger: { subject: "action", name: "Action" },
+  surprise: { subject: "mystery", name: "Mystère" },
 }
 
 // Mapping des textes à afficher par humeur
@@ -36,6 +47,7 @@ export default function Home() {
   const [displayText, setDisplayText] = useState(moodTextMap.default)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false)
+  const [contentType, setContentType] = useState<'movies' | 'books'>('movies')
 
   const handleMoodSelect = (mood: string) => {
     if (mood !== selectedMood && !isTransitioning) {
@@ -84,8 +96,27 @@ export default function Home() {
   return (
     <div className="min-h-screen py-10 px-4">
       <div className="max-w-4xl mx-auto">
-        {/* Bouton d'accès aux favoris - modifié pour ouvrir le modal */}
-        <div className="flex justify-end mb-4">
+        {/* Bouton d'accès aux favoris et sélecteur de contenu */}
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex gap-2">
+            <Button 
+              variant={contentType === 'movies' ? 'default' : 'outline'}
+              className="gap-2 px-4 bg-black/40 backdrop-blur-sm border-white/20 rounded-full hover:text-white hover:bg-black/60"
+              onClick={() => setContentType('movies')}
+            >
+              <Film className="h-4 w-4" />
+              <span className="max-sm:hidden">Movies</span>
+            </Button>
+            <Button 
+              variant={contentType === 'books' ? 'default' : 'outline'}
+              className="gap-2 px-4 bg-black/40 backdrop-blur-sm border-white/20 rounded-full hover:text-white hover:bg-black/60"
+              onClick={() => setContentType('books')}
+            >
+              <BookOpen className="h-4 w-4" />
+              <span className="max-sm:hidden">Books</span>
+            </Button>
+          </div>
+          
           <Button 
             variant="outline" 
             className="gap-2 px-4 bg-black/40 backdrop-blur-sm border-white/20 rounded-full hover:text-white hover:bg-black/60"
@@ -157,7 +188,11 @@ export default function Home() {
               <TabsContent key={mood} value={mood} className="mt-0">
                 <Card className="backdrop-blur-md bg-black/30 border-white/10">
                   <CardContent className="pt-6">
-                    <MovieList genreId={genre.id} />
+                    {contentType === 'movies' ? (
+                      <MovieList genreId={genre.id} />
+                    ) : (
+                      <BookList subject={moodBookMap[mood as keyof typeof moodBookMap].subject} />
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -167,8 +202,12 @@ export default function Home() {
           // Section d'accueil lorsqu'aucune humeur n'est sélectionnée
           <Card className="backdrop-blur-md bg-black/30 border-white/10">
             <CardContent className="pt-6 text-center py-16">
-              <h2 className="text-2xl text-white custom-font mb-4">Select your mood above to find movies</h2>
-              <p className="text-white/70">Choose one of the mood bubbles above to discover films that match your current emotional state.</p>
+              <h2 className="text-2xl text-white custom-font mb-4">
+                Select your mood above to find {contentType === 'movies' ? 'movies' : 'books'}
+              </h2>
+              <p className="text-white/70">
+                Choose one of the mood bubbles above to discover {contentType === 'movies' ? 'films' : 'books'} that match your current emotional state.
+              </p>
             </CardContent>
           </Card>
         )}
