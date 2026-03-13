@@ -4,105 +4,98 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Star, Heart, Eye, EyeOff, BookOpen } from "lucide-react"
+import { Star, Heart, Eye, EyeOff, Tv } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { BookDetailsModal } from "./book-details-modal"
+import { WatchProvidersModal } from "./watch-providers-modal"
 import { useFavorites } from '@/context/favorites-context'
 import { useWatched } from '@/context/watched-context'
-import { Book } from "@/types/book"
+import { Show } from "@/types/show"
+import { Movie } from "@/types/movie"
 
-export interface BookListProps {
-  subject: string
+export interface ShowListProps {
+  genreId: number
 }
 
-export function BookList({ subject }: BookListProps) {
-  const [books, setBooks] = useState<Book[]>([])
+const SORT_METHODS = ['popularity.desc', 'vote_average.desc', 'first_air_date.desc']
+
+// Convertit un Show en Movie pour favoris/watched
+function showToMovie(show: Show): Movie {
+  return {
+    id: show.id,
+    title: show.name,
+    poster_path: show.poster_path,
+    vote_average: show.vote_average,
+    release_date: show.first_air_date,
+    overview: show.overview,
+    media_type: 'show',
+  }
+}
+
+export function ShowList({ genreId }: ShowListProps) {
+  const [shows, setShows] = useState<Show[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
-  const [startIndex, setStartIndex] = useState(0)
-  const [hasMore, setHasMore] = useState(true)
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [sort, setSort] = useState('')
+  const [selectedShow, setSelectedShow] = useState<Show | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const sentinelRef = useRef<HTMLDivElement>(null)
   const { isFavorite, toggleFavorite } = useFavorites()
   const { isWatched, toggleWatched } = useWatched()
 
-  const fetchBooks = useCallback(async (index: number, append: boolean) => {
+  const getDailyPage = () => {
+    const day = Math.floor(Date.now() / 86400000)
+    return (day % 20) + 1
+  }
+
+  const fetchShows = useCallback(async (pageNumber: number, sortMethod: string, append: boolean) => {
     if (append) setLoadingMore(true)
     else setLoading(true)
 
     try {
-      const orderOptions = ['relevance', 'newest']
-      const orderBy = orderOptions[Math.floor(Math.random() * orderOptions.length)]
       const timestamp = Date.now()
-      const response = await fetch(`/api/books?subject=${subject}&startIndex=${index}&orderBy=${orderBy}&_=${timestamp}`)
+      const response = await fetch(`/api/shows?genreId=${genreId}&page=${pageNumber}&sort=${sortMethod}&_=${timestamp}`)
       const data = await response.json()
 
-      if (data.items && data.items.length > 0) {
-        const filtered = data.items
-          .filter((book: Book) =>
-            book.title &&
-            (book.imageLinks?.thumbnail || book.imageLinks?.smallThumbnail) &&
-            (book.averageRating === undefined || book.averageRating >= 3.5)
-          )
-          .slice(0, 10)
-
-        setHasMore(data.items.length >= 20)
-        setStartIndex(index)
-
+      if (data.results && data.results.length > 0) {
+        setTotalPages(data.total_pages || 1)
+        setPage(pageNumber)
         if (append) {
-          setBooks(prev => {
-            const ids = new Set(prev.map(b => b.id))
-            return [...prev, ...filtered.filter((b: Book) => !ids.has(b.id))]
-          })
+          setShows(prev => [...prev, ...data.results.slice(0, 10)])
         } else {
-          setBooks(filtered)
+          setShows(data.results.slice(0, 10))
         }
-      } else {
-        if (!append) setBooks([])
-        setHasMore(false)
-        console.error("No books found or API error:", data.error || "Unknown error")
       }
     } catch (error) {
-      console.error("Error fetching books:", error)
-      if (!append) setBooks([])
+      console.error("Error fetching shows:", error)
     } finally {
       setLoading(false)
       setLoadingMore(false)
     }
-  }, [subject])
+  }, [genreId])
 
   useEffect(() => {
-    setBooks([])
-    setStartIndex(0)
-    setHasMore(true)
-    fetchBooks(0, false)
-  }, [fetchBooks])
+    const initialSort = SORT_METHODS[Math.floor(Math.random() * SORT_METHODS.length)]
+    const initialPage = getDailyPage() + Math.floor(Math.random() * 3)
+    setSort(initialSort)
+    fetchShows(initialPage, initialSort, false)
+  }, [fetchShows])
 
   // Infinite scroll
   useEffect(() => {
     if (!sentinelRef.current) return
     const observer = new IntersectionObserver(
       entries => {
-        if (entries[0].isIntersecting && !loadingMore && !loading && hasMore) {
-          fetchBooks(startIndex + 40, true)
+        if (entries[0].isIntersecting && !loadingMore && !loading && page < totalPages) {
+          fetchShows(page + 1, sort, true)
         }
       },
       { threshold: 0.1 }
     )
     observer.observe(sentinelRef.current)
     return () => observer.disconnect()
-  }, [loadingMore, loading, hasMore, startIndex, fetchBooks])
-
-  // Convertit un livre en Movie pour favoris/watched (IDs négatifs pour les livres)
-  const bookToMovie = (book: Book) => ({
-    id: -(parseInt(book.id.replace(/\D/g, '')) || Math.abs(book.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0))),
-    title: book.title,
-    poster_path: (book.imageLinks?.thumbnail || book.imageLinks?.smallThumbnail || null)?.replace(/^http:/, 'https:') || null,
-    vote_average: book.averageRating || 0,
-    release_date: book.publishedDate || '',
-    overview: book.description || ''
-  })
+  }, [loadingMore, loading, page, totalPages, sort, fetchShows])
 
   if (loading) {
     return (
@@ -125,33 +118,33 @@ export function BookList({ subject }: BookListProps) {
     )
   }
 
-  if (books.length === 0 && !loading) {
+  if (shows.length === 0) {
     return (
       <div className="text-center py-10">
-        <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4 opacity-20" />
-        <p className="text-muted-foreground">No books found 😔.</p>
+        <Tv className="mx-auto h-12 w-12 text-muted-foreground mb-4 opacity-20" />
+        <p className="text-muted-foreground">No shows found 😔.</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {books.map((book, index) => {
-          const movieFormat = bookToMovie(book)
+        {shows.map((show, index) => {
+          const movieFormat = showToMovie(show)
           return (
             <Card
-              key={`${book.id}-${index}`}
+              key={`${show.id}-${index}`}
               className="overflow-hidden cursor-pointer bg-black/20 border-white/5
                         transition-all duration-300 ease-out
                         transform hover:scale-[1.03] hover:shadow-[0_10px_40px_rgba(0,0,0,0.3)]
                         hover:border-white/20 hover:bg-black/30"
-              onClick={() => { setSelectedBook(book); setIsModalOpen(true) }}
+              onClick={() => { setSelectedShow(show); setIsModalOpen(true) }}
             >
               <div className="relative aspect-[2/3] w-full overflow-hidden">
                 <Image
-                  src={(book.imageLinks?.thumbnail || book.imageLinks?.smallThumbnail || "/no-image.png").replace(/^http:/, 'https:')}
-                  alt={book.title}
+                  src={show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : "/no-image.png"}
+                  alt={show.name}
                   fill
                   sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
                   className="object-cover transition-transform duration-500 hover:scale-110"
@@ -165,9 +158,9 @@ export function BookList({ subject }: BookListProps) {
                     size="icon"
                     className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8"
                     onClick={e => { e.stopPropagation(); toggleWatched(movieFormat) }}
-                    title={isWatched(movieFormat.id) ? "Marquer comme non lu" : "Marquer comme lu"}
+                    title={isWatched(show.id) ? "Marquer comme non vu" : "Marquer comme vu"}
                   >
-                    {isWatched(movieFormat.id)
+                    {isWatched(show.id)
                       ? <EyeOff className="h-4 w-4 text-blue-400" />
                       : <Eye className="h-4 w-4 text-white" />}
                   </Button>
@@ -180,24 +173,19 @@ export function BookList({ subject }: BookListProps) {
                     className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8"
                     onClick={e => { e.stopPropagation(); toggleFavorite(movieFormat) }}
                   >
-                    <Heart className={`h-4 w-4 ${isFavorite(movieFormat.id) ? "fill-red-500 text-red-500" : "text-white"}`} />
+                    <Heart className={`h-4 w-4 ${isFavorite(show.id) ? "fill-red-500 text-red-500" : "text-white"}`} />
                   </Button>
                 </div>
               </div>
 
               <CardContent className="p-4">
-                <h3 className="font-medium text-white line-clamp-2 text-sm leading-tight mb-1">{book.title}</h3>
-                {book.authors && book.authors.length > 0 && (
-                  <p className="text-xs text-white/60 line-clamp-1 mb-2">by {book.authors.slice(0, 2).join(", ")}</p>
-                )}
-                <div className="flex items-center justify-between text-xs text-white/70">
-                  <span>{book.publishedDate?.split("-")[0] || "N/A"}</span>
-                  {book.averageRating && (
-                    <div className="flex items-center">
-                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 mr-1" />
-                      <span>{book.averageRating.toFixed(1)}</span>
-                    </div>
-                  )}
+                <h3 className="font-medium text-white line-clamp-1">{show.name}</h3>
+                <div className="flex items-center justify-between mt-2 text-sm text-white/70">
+                  <span>{show.first_air_date?.split("-")[0] || "N/A"}</span>
+                  <div className="flex items-center">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+                    <span>{show.vote_average.toFixed(1)}</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -216,19 +204,14 @@ export function BookList({ subject }: BookListProps) {
         )}
       </div>
 
-      {selectedBook && (
-        <BookDetailsModal
-          bookId={selectedBook.id}
-          bookTitle={selectedBook.title}
-          bookDescription={selectedBook.description}
-          bookAuthors={selectedBook.authors}
-          bookImageUrl={selectedBook.imageLinks?.thumbnail || selectedBook.imageLinks?.smallThumbnail}
-          bookPublishedDate={selectedBook.publishedDate}
-          bookRating={selectedBook.averageRating}
-          bookPreviewLink={selectedBook.previewLink}
-          bookInfoLink={selectedBook.infoLink}
+      {selectedShow && (
+        <WatchProvidersModal
+          movieId={selectedShow.id}
+          movieTitle={selectedShow.name}
+          movieOverview={selectedShow.overview}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          mediaType="tv"
         />
       )}
     </div>

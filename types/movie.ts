@@ -15,4 +15,5 @@ export interface Movie {
     vote_count?: number;
     adult?: boolean;
     original_title?: string;
+    media_type?: 'movie' | 'show';
   }

@@ -25,9 +25,10 @@ interface WatchProviders {
 interface WatchProvidersModalProps {
   movieId: number | null
   movieTitle: string
-  movieOverview?: string  // Ajout du champ pour la synopsis
+  movieOverview?: string
   isOpen: boolean
   onClose: () => void
+  mediaType?: 'movie' | 'tv'
 }
 
 // Available countries list - only Canada and United States
@@ -36,7 +37,7 @@ const countries = [
   { code: "US", name: "United States" },
 ]
 
-export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen, onClose }: WatchProvidersModalProps) {
+export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen, onClose, mediaType = 'movie' }: WatchProvidersModalProps) {
   const [providers, setProviders] = useState<WatchProviders | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -75,7 +76,7 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
       setError(null)
 
       try {
-        const response = await fetch(`/api/movies/providers?movieId=${movieId}`)
+        const response = await fetch(`/api/movies/providers?movieId=${movieId}&mediaType=${mediaType}`)
         const data = await response.json()
 
         if (data.error) {

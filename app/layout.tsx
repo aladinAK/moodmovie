@@ -4,6 +4,7 @@ import { ScrollToTop } from "@/components/scroll-to-top"
 import { AnimatedBackground } from "@/components/animated-background"
 import { Analytics } from "@vercel/analytics/react"
 import { FavoritesProvider } from '@/context/favorites-context'
+import { WatchedProvider } from '@/context/watched-context'
 
 
 import "./globals.css";
@@ -137,6 +138,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} radial-bg antialiased min-h-screen flex flex-col`}
       >
         <FavoritesProvider>
+        <WatchedProvider>
         <AnimatedBackground />
         <main className="flex-1">
           {children}
@@ -144,6 +146,7 @@ export default function RootLayout({
         <ScrollToTop />
         <Footer />
         <Analytics />
+        </WatchedProvider>
         </FavoritesProvider>
       </body>
     </html>

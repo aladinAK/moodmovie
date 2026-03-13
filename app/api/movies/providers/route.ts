@@ -5,6 +5,7 @@ const API_KEY = process.env.TMDB_API_KEY
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const movieId = searchParams.get("movieId")
+  const mediaType = searchParams.get("mediaType") || "movie"
 
   if (!movieId) {
     return NextResponse.json({ error: "Movie ID is required" }, { status: 400 })
@@ -15,9 +16,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "API configuration error" }, { status: 500 })
   }
 
+  const endpoint = mediaType === "tv" ? "tv" : "movie"
+
   try {
     const response = await fetch(
-      `https://api.themoviedb.org/3/movie/${movieId}/watch/providers?api_key=${API_KEY}`, 
+      `https://api.themoviedb.org/3/${endpoint}/${movieId}/watch/providers?api_key=${API_KEY}`,
       {
         next: { revalidate: 86400 }, // Cache pour 24 heures (les options de streaming changent moins souvent)
       }
