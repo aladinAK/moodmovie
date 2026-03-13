@@ -40,12 +40,12 @@ const moodBookMap = {
 }
 
 const moodMusicMap = {
-  joy:      { genre: "happy pop",        name: "Pop Joyeux" },
-  sadness:  { genre: "sad ballad soul",  name: "Ballades Tristes" },
-  disgust:  { genre: "dark metal",       name: "Metal Sombre" },
-  fear:     { genre: "horror atmospheric", name: "Atmosphérique" },
-  anger:    { genre: "rage rock metal",  name: "Rock Rage" },
-  surprise: { genre: "experimental indie", name: "Indie Expérimental" },
+  joy:      { genre: "pop dance",   name: "Pop Dansant" },
+  sadness:  { genre: "soul blues",  name: "Soul & Blues" },
+  disgust:  { genre: "heavy metal", name: "Heavy Metal" },
+  fear:     { genre: "dark ambient",name: "Dark Ambient" },
+  anger:    { genre: "hard rock",   name: "Hard Rock" },
+  surprise: { genre: "indie rock",  name: "Indie Rock" },
 }
 
 const moodTextMap = {
