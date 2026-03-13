@@ -24,7 +24,7 @@ const moodGenreMap = {
 const moodShowMap = {
   joy:      { id: 35,    name: "Comédie" },
   sadness:  { id: 18,    name: "Drame" },
-  disgust:  { id: 27,    name: "Horreur" },
+  disgust:  { id: 80,    name: "Crime" },
   fear:     { id: 9648,  name: "Mystère" },
   anger:    { id: 10759, name: "Action & Aventure" },
   surprise: { id: 10765, name: "Sci-Fi & Fantaisie" },
@@ -66,6 +66,13 @@ export default function Home() {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false)
   const [contentType, setContentType] = useState<ContentType>('movies')
+  const [showStickyBar, setShowStickyBar] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setShowStickyBar(window.scrollY > 280)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const handleMoodSelect = (mood: string) => {
     if (mood !== selectedMood && !isTransitioning) {
@@ -104,34 +111,88 @@ export default function Home() {
   ]
 
   return (
-    <div className="min-h-screen py-10 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex gap-2 flex-wrap">
+    <div className="min-h-screen pb-10 pt-5 px-4">
+
+      {/* Barre sticky — format + mood + favorites, apparaît au scroll */}
+      <div className={cn(
+        "fixed top-0 left-0 right-0 z-40 backdrop-blur-md bg-black/70 border-b border-white/10 px-4 py-2.5 transition-all duration-300",
+        showStickyBar ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
+      )}>
+        <div className="max-w-4xl mx-auto flex justify-between items-center gap-2">
+          <div className="flex gap-1.5">
             {contentButtons.map(({ type, icon, label }) => (
-              <Button
+              <button
                 key={type}
-                variant={contentType === type ? 'default' : 'outline'}
-                className="gap-2 px-4 bg-black/40 backdrop-blur-sm border-white/20 rounded-full hover:text-white hover:bg-black/60"
+                className={cn(
+                  "flex items-center gap-1.5 px-3 h-9 rounded-full border text-xs font-medium transition-all duration-200 min-w-[44px]",
+                  contentType === type
+                    ? "bg-white text-black border-white shadow-md"
+                    : "bg-black/40 text-white/70 border-white/20 hover:bg-white/10 hover:text-white"
+                )}
                 onClick={() => setContentType(type)}
               >
                 {icon}
                 <span className="max-sm:hidden">{label}</span>
-              </Button>
+              </button>
             ))}
           </div>
 
+          <div className="flex items-center gap-1.5">
+            {Object.keys(moodGenreMap).map((mood) => (
+              <button
+                key={mood}
+                onClick={() => handleMoodSelect(mood)}
+                className={cn(
+                  "rounded-full w-9 h-9 text-base transition-all duration-300 min-w-[44px]",
+                  selectedMood === mood
+                    ? "bg-white/40 border-2 border-white scale-110"
+                    : "bg-white/10 border border-white/20 hover:bg-white/20"
+                )}
+                title={mood.toUpperCase()}
+              >
+                {mood === "joy" ? "😄" : mood === "sadness" ? "😢" : mood === "disgust" ? "🤢" : mood === "fear" ? "😱" : mood === "anger" ? "😤" : "😲"}
+              </button>
+            ))}
+            <Button
+              variant="outline"
+              className="gap-1.5 px-3 h-9 bg-black/40 border-white/20 rounded-full hover:text-white hover:bg-black/60 min-w-[44px]"
+              onClick={() => setIsFavoritesModalOpen(true)}
+            >
+              <Heart className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto">
+        {/* Barre statique — toujours visible en haut */}
+        <div className="flex justify-between items-center mb-6 gap-2">
+          <div className="flex gap-2 flex-wrap">
+            {contentButtons.map(({ type, icon, label }) => (
+              <button
+                key={type}
+                className={cn(
+                  "flex items-center gap-2 px-4 h-10 rounded-full border font-medium transition-all duration-200 min-w-[44px]",
+                  contentType === type
+                    ? "bg-white text-black border-white shadow-md"
+                    : "bg-black/40 backdrop-blur-sm text-white/70 border-white/20 hover:bg-white/10 hover:text-white"
+                )}
+                onClick={() => setContentType(type)}
+              >
+                {icon}
+                <span className="max-sm:hidden">{label}</span>
+              </button>
+            ))}
+          </div>
           <Button
             variant="outline"
-            className="gap-2 px-4 bg-black/40 backdrop-blur-sm border-white/20 rounded-full hover:text-white hover:bg-black/60"
-            title="Ma collection"
+            className="gap-2 px-4 h-10 bg-black/40 backdrop-blur-sm border-white/20 rounded-full hover:text-white hover:bg-black/60 min-w-[44px]"
             onClick={() => setIsFavoritesModalOpen(true)}
           >
             <Heart className="h-4 w-4" />
             <span className="max-sm:hidden">Favorites</span>
           </Button>
         </div>
-
         <div className="relative flex flex-col items-center my-10 max-sm:mt-0 max-sm:mb-6">
           <h1 className="custom-font text-7xl max-sm:text-3xl text-center font-bold text-white z-10 mb-5">
             I WANT TO <br />
@@ -175,7 +236,14 @@ export default function Home() {
             {Object.entries(moodGenreMap).map(([mood, genre]) => (
               <TabsContent key={mood} value={mood} className="mt-0">
                 <Card className="backdrop-blur-md bg-black/30 border-white/10">
-                  <CardContent className="pt-6">
+                  <CardContent className="pt-4">
+                    {/* Label genre actif */}
+                    <p className="text-xs text-white/40 uppercase tracking-widest mb-4">
+                      {contentType === 'movies' ? genre.name
+                        : contentType === 'shows' ? moodShowMap[mood as keyof typeof moodShowMap].name
+                        : contentType === 'books' ? moodBookMap[mood as keyof typeof moodBookMap].name
+                        : moodMusicMap[mood as keyof typeof moodMusicMap].name}
+                    </p>
                     {contentType === 'movies' && <MovieList genreId={genre.id} />}
                     {contentType === 'shows'  && <ShowList genreId={moodShowMap[mood as keyof typeof moodShowMap].id} />}
                     {contentType === 'books'  && <BookList subject={moodBookMap[mood as keyof typeof moodBookMap].subject} />}

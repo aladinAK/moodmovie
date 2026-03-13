@@ -21,6 +21,10 @@ const nextConfig = {
         hostname: 'books.google.com',
         pathname: '/books/content/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn-images.dzcdn.net',
+      },
     ],
   },
 }

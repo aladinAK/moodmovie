@@ -73,10 +73,11 @@ export function BookList({ subject }: BookListProps) {
   }, [subject])
 
   useEffect(() => {
+    const randomStart = Math.floor(Math.random() * 6) * 40
     setBooks([])
-    setStartIndex(0)
+    setStartIndex(randomStart)
     setHasMore(true)
-    fetchBooks(0, false)
+    fetchBooks(randomStart, false)
   }, [fetchBooks])
 
   // Infinite scroll

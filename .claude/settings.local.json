@@ -8,7 +8,12 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(git fetch:*)",
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "Bash(sed -i '' \"s|import { FavoritesProvider } from ''@/context/favorites-context''|import { FavoritesProvider } from ''@/context/favorites-context''\\\\nimport { WatchedProvider } from ''@/context/watched-context''|\" /Users/aladin/Downloads/moodmovie-main/app/layout.tsx)",
+      "Bash(sed -i '' 's|<FavoritesProvider>|<FavoritesProvider>\\\\n        <WatchedProvider>|' /Users/aladin/Downloads/moodmovie-main/app/layout.tsx)",
+      "Bash(sed -i '' 's|        </FavoritesProvider>|        </WatchedProvider>\\\\n        </FavoritesProvider>|' /Users/aladin/Downloads/moodmovie-main/app/layout.tsx)",
+      "Bash(pnpm build:*)",
+      "Bash(ls -la /Users/aladin/Downloads/moodmovie-main/*.md)"
     ]
   }
 }

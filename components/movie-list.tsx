@@ -16,6 +16,7 @@ export interface MovieListProps {
 }
 
 const SORT_METHODS = ['popularity.desc', 'vote_average.desc', 'release_date.desc', 'revenue.desc']
+const randomPage = () => Math.floor(Math.random() * 8) + 1
 
 export function MovieList({ genreId }: MovieListProps) {
   const [movies, setMovies] = useState<Movie[]>([])
@@ -29,12 +30,6 @@ export function MovieList({ genreId }: MovieListProps) {
   const sentinelRef = useRef<HTMLDivElement>(null)
   const { isFavorite, toggleFavorite } = useFavorites()
   const { isWatched, toggleWatched } = useWatched()
-
-  const getDailyPage = () => {
-    const today = new Date()
-    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000)
-    return (dayOfYear % 25) + 1
-  }
 
   const fetchMovies = useCallback(async (pageNumber: number, sortMethod: string, append: boolean) => {
     if (append) setLoadingMore(true)
@@ -55,6 +50,15 @@ export function MovieList({ genreId }: MovieListProps) {
         } else {
           setMovies(data.results.slice(0, 10))
         }
+      } else if (!append && pageNumber > 1) {
+        // Fallback: page aléatoire vide → retry page 1
+        const res2 = await fetch(`/api/movies?genreId=${genreId}&page=1&sort=${sortMethod}`)
+        const data2 = await res2.json()
+        if (data2.results && data2.results.length > 0) {
+          setTotalPages(Math.min(data2.total_pages || 1, 40))
+          setPage(1)
+          setMovies(data2.results.slice(0, 10))
+        }
       }
     } catch (error) {
       console.error("Error fetching movies:", error)
@@ -66,9 +70,8 @@ export function MovieList({ genreId }: MovieListProps) {
 
   useEffect(() => {
     const initialSort = SORT_METHODS[Math.floor(Math.random() * SORT_METHODS.length)]
-    const initialPage = getDailyPage() + Math.floor(Math.random() * 5)
     setSort(initialSort)
-    fetchMovies(Math.min(initialPage, 40), initialSort, false)
+    fetchMovies(randomPage(), initialSort, false)
   }, [fetchMovies])
 
   useEffect(() => {

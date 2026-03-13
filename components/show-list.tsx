@@ -17,6 +17,7 @@ export interface ShowListProps {
 }
 
 const SORT_METHODS = ['popularity.desc', 'vote_average.desc', 'first_air_date.desc']
+const randomPage = () => Math.floor(Math.random() * 6) + 1
 
 // Convertit un Show en Movie pour favoris/watched
 function showToMovie(show: Show): Movie {
@@ -44,11 +45,6 @@ export function ShowList({ genreId }: ShowListProps) {
   const { isFavorite, toggleFavorite } = useFavorites()
   const { isWatched, toggleWatched } = useWatched()
 
-  const getDailyPage = () => {
-    const day = Math.floor(Date.now() / 86400000)
-    return (day % 20) + 1
-  }
-
   const fetchShows = useCallback(async (pageNumber: number, sortMethod: string, append: boolean) => {
     if (append) setLoadingMore(true)
     else setLoading(true)
@@ -66,6 +62,15 @@ export function ShowList({ genreId }: ShowListProps) {
         } else {
           setShows(data.results.slice(0, 10))
         }
+      } else if (!append && pageNumber > 1) {
+        // Fallback: page aléatoire vide → retry page 1
+        const res2 = await fetch(`/api/shows?genreId=${genreId}&page=1&sort=${sortMethod}&_=${timestamp}`)
+        const data2 = await res2.json()
+        if (data2.results && data2.results.length > 0) {
+          setTotalPages(data2.total_pages || 1)
+          setPage(1)
+          setShows(data2.results.slice(0, 10))
+        }
       }
     } catch (error) {
       console.error("Error fetching shows:", error)
@@ -77,9 +82,8 @@ export function ShowList({ genreId }: ShowListProps) {
 
   useEffect(() => {
     const initialSort = SORT_METHODS[Math.floor(Math.random() * SORT_METHODS.length)]
-    const initialPage = getDailyPage() + Math.floor(Math.random() * 3)
     setSort(initialSort)
-    fetchShows(initialPage, initialSort, false)
+    fetchShows(randomPage(), initialSort, false)
   }, [fetchShows])
 
   // Infinite scroll

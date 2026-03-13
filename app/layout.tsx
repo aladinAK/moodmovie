@@ -5,6 +5,8 @@ import { AnimatedBackground } from "@/components/animated-background"
 import { Analytics } from "@vercel/analytics/react"
 import { FavoritesProvider } from '@/context/favorites-context'
 import { WatchedProvider } from '@/context/watched-context'
+import { MusicPlayerProvider } from '@/context/music-player-context'
+import { MusicMiniPlayer } from '@/components/music-mini-player'
 
 
 import "./globals.css";
@@ -137,17 +139,20 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} radial-bg antialiased min-h-screen flex flex-col`}
       >
+        <MusicPlayerProvider>
         <FavoritesProvider>
         <WatchedProvider>
         <AnimatedBackground />
         <main className="flex-1">
           {children}
         </main>
+        <MusicMiniPlayer />
         <ScrollToTop />
         <Footer />
         <Analytics />
         </WatchedProvider>
         </FavoritesProvider>
+        </MusicPlayerProvider>
       </body>
     </html>
   );

@@ -143,11 +143,11 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-black/80 backdrop-blur-md border-white/10">
         <DialogHeader>
-          <DialogTitle className="text-xl">{movieTitle}</DialogTitle>
-          <DialogDescription className="text-muted-foreground text-sm">
-            Find where to watch this movie online
+          <DialogTitle className="text-xl text-white custom-font">{movieTitle}</DialogTitle>
+          <DialogDescription className="text-white/60 text-sm">
+            Find where to watch this {mediaType === 'tv' ? 'show' : 'movie'} online
           </DialogDescription>
           
           {/* Synopsis du film */}
@@ -159,12 +159,12 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
         </DialogHeader>
 
         <div className="mb-4">
-          <label className="text-sm font-medium mb-1 block">Country</label>
+          <label className="text-sm font-medium mb-1 block text-white/80">Country</label>
           <Select value={country} onValueChange={handleCountryChange}>
-            <SelectTrigger>
+            <SelectTrigger className="bg-black/30 border-white/20 text-white">
               <SelectValue placeholder="Select a country" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-black/90 border-white/10 text-white">
               {countries.map((country) => (
                 <SelectItem key={country.code} value={country.code}>
                   {country.name}
@@ -184,16 +184,16 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
             </div>
           </div>
         ) : error ? (
-          <div className="py-6 text-center text-muted-foreground">
+          <div className="py-6 text-center text-white/50">
             <p>{error}</p>
           </div>
         ) : !hasProviders ? (
-          <div className="py-6 text-center text-muted-foreground">
-            <p>No providers available for this movie in {countryName}</p>
+          <div className="py-6 text-center text-white/50">
+            <p>No providers available in {countryName}</p>
           </div>
         ) : (
           <Tabs defaultValue="flatrate" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-3 bg-black/20">
               <TabsTrigger value="flatrate" disabled={!providers?.flatrate?.length}>
                 Streaming
               </TabsTrigger>
@@ -207,7 +207,7 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
 
             {providers?.flatrate && providers.flatrate.length > 0 && (
               <TabsContent value="flatrate" className="py-4">
-                <h3 className="mb-3 font-medium">Available for streaming on:</h3>
+                <h3 className="mb-3 font-medium text-white/80">Available for streaming on:</h3>
                 <div className="flex flex-wrap gap-3">
                   {providers.flatrate.map((provider) => (
                     <a 
@@ -238,7 +238,7 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
 
             {providers?.rent && providers.rent.length > 0 && (
               <TabsContent value="rent" className="py-4">
-                <h3 className="mb-3 font-medium">Available for rental on:</h3>
+                <h3 className="mb-3 font-medium text-white/80">Available for rental on:</h3>
                 <div className="flex flex-wrap gap-3">
                   {providers.rent.map((provider) => (
                     <a 
@@ -269,7 +269,7 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
 
             {providers?.buy && providers.buy.length > 0 && (
               <TabsContent value="buy" className="py-4">
-                <h3 className="mb-3 font-medium">Available for purchase on:</h3>
+                <h3 className="mb-3 font-medium text-white/80">Available for purchase on:</h3>
                 <div className="flex flex-wrap gap-3">
                   {providers.buy.map((provider) => (
                     <a 

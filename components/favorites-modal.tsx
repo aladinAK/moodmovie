@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Star, Heart, Trash2, Film, BookOpen, Eye } from "lucide-react"
+import { Star, Heart, Trash2, Film, BookOpen, Eye, Tv } from "lucide-react"
 import { useFavorites } from "@/context/favorites-context"
 import { useWatched } from "@/context/watched-context"
 import { WatchProvidersModal } from "./watch-providers-modal"
@@ -47,7 +47,8 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
   const [activeTab, setActiveTab] = useState("movies")
 
-  const movieFavorites = favorites.filter(item => item.id > 0)
+  const movieFavorites = favorites.filter(item => item.id > 0 && item.media_type !== 'show')
+  const showFavorites = favorites.filter(item => item.id > 0 && item.media_type === 'show')
   const bookFavorites = favorites.filter(item => item.id < 0)
   // Watched: movies (id > 0 and not 'show'), shows (media_type === 'show'), books (id < 0)
   const watchedMovies = watched.filter(item => item.id > 0 && item.media_type !== 'show')
@@ -72,7 +73,7 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
     setIsBookModalOpen(true)
   }
 
-  const activeItemsCount = activeTab === "movies" ? movieFavorites.length
+  const activeItemsCount = activeTab === "movies" ? movieFavorites.length + showFavorites.length
     : activeTab === "books" ? bookFavorites.length
     : watched.length
 
@@ -99,8 +100,8 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
           <TabsList className="grid w-full grid-cols-3 mb-4 bg-black/20">
             <TabsTrigger value="movies" className="flex items-center gap-2">
               <Film className="h-4 w-4" />
-              <span className="max-sm:hidden">Movies</span>
-              <span>({movieFavorites.length})</span>
+              <span className="max-sm:hidden">Movies & Shows</span>
+              <span>({movieFavorites.length + showFavorites.length})</span>
             </TabsTrigger>
             <TabsTrigger value="books" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
@@ -114,45 +115,92 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
             </TabsTrigger>
           </TabsList>
 
-          {/* Favoris Films */}
+          {/* Favoris Films & Séries */}
           <TabsContent value="movies">
-            {movieFavorites.length === 0 ? (
+            {movieFavorites.length === 0 && showFavorites.length === 0 ? (
               <div className="py-12 text-center">
                 <Film className="mx-auto h-12 w-12 text-muted-foreground mb-4 opacity-20" />
-                <h2 className="text-xl text-white custom-font mb-2">No favorite movies yet</h2>
-                <p className="text-white/70">Add movies to your favorites by clicking the heart icon.</p>
+                <h2 className="text-xl text-white custom-font mb-2">No favorites yet</h2>
+                <p className="text-white/70">Add movies or shows to your favorites by clicking the heart icon.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {movieFavorites.map((movie) => (
-                  <Card key={movie.id} className="overflow-hidden bg-black/20 border-white/5 transition-all duration-300 hover:border-white/20 hover:bg-black/30">
-                    <div className="relative aspect-[2/3] w-full overflow-hidden">
-                      <Image
-                        src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "/no-image.png"}
-                        alt={movie.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className="object-cover cursor-pointer"
-                        onClick={() => handleMovieClick(movie)}
-                      />
-                      <div className="absolute top-2 right-2 z-10">
-                        <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleFavorite(movie)}>
-                          <Heart className="h-4 w-4 fill-red-500 text-red-500" />
-                        </Button>
-                      </div>
+              <div className="space-y-6">
+                {movieFavorites.length > 0 && (
+                  <div>
+                    {showFavorites.length > 0 && (
+                      <h3 className="text-sm font-medium text-white/50 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <Film className="h-3 w-3" /> Movies ({movieFavorites.length})
+                      </h3>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {movieFavorites.map((movie) => (
+                        <Card key={movie.id} className="overflow-hidden bg-black/20 border-white/5 transition-all duration-300 hover:border-white/20 hover:bg-black/30">
+                          <div className="relative aspect-[2/3] w-full overflow-hidden">
+                            <Image
+                              src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "/no-image.png"}
+                              alt={movie.title} fill
+                              sizes="(max-width: 768px) 100vw, 33vw"
+                              className="object-cover cursor-pointer"
+                              onClick={() => handleMovieClick(movie)}
+                            />
+                            <div className="absolute top-2 right-2 z-10">
+                              <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleFavorite(movie)}>
+                                <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+                              </Button>
+                            </div>
+                          </div>
+                          <CardContent className="p-4 cursor-pointer" onClick={() => handleMovieClick(movie)}>
+                            <h3 className="font-medium text-white line-clamp-1">{movie.title}</h3>
+                            <div className="flex items-center justify-between mt-2 text-sm text-white/70">
+                              <span>{movie.release_date?.split("-")[0] || "N/A"}</span>
+                              <div className="flex items-center">
+                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+                                <span>{movie.vote_average?.toFixed(1) || "N/A"}</span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
-                    <CardContent className="p-4 cursor-pointer" onClick={() => handleMovieClick(movie)}>
-                      <h3 className="font-medium text-white line-clamp-1">{movie.title}</h3>
-                      <div className="flex items-center justify-between mt-2 text-sm text-white/70">
-                        <span>{movie.release_date?.split("-")[0] || "N/A"}</span>
-                        <div className="flex items-center">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
-                          <span>{movie.vote_average?.toFixed(1) || "N/A"}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                  </div>
+                )}
+                {showFavorites.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-white/50 uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <Tv className="h-3 w-3" /> Shows ({showFavorites.length})
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {showFavorites.map((show) => (
+                        <Card key={show.id} className="overflow-hidden bg-black/20 border-white/5 transition-all duration-300 hover:border-white/20 hover:bg-black/30">
+                          <div className="relative aspect-[2/3] w-full overflow-hidden">
+                            <Image
+                              src={show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : "/no-image.png"}
+                              alt={show.title} fill
+                              sizes="(max-width: 768px) 100vw, 33vw"
+                              className="object-cover cursor-pointer"
+                              onClick={() => handleMovieClick(show)}
+                            />
+                            <div className="absolute top-2 right-2 z-10">
+                              <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleFavorite(show)}>
+                                <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+                              </Button>
+                            </div>
+                          </div>
+                          <CardContent className="p-4 cursor-pointer" onClick={() => handleMovieClick(show)}>
+                            <h3 className="font-medium text-white line-clamp-1">{show.title}</h3>
+                            <div className="flex items-center justify-between mt-2 text-sm text-white/70">
+                              <span>{show.release_date?.split("-")[0] || "N/A"}</span>
+                              <div className="flex items-center">
+                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+                                <span>{show.vote_average?.toFixed(1) || "N/A"}</span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </TabsContent>

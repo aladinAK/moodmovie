@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
   try {
     const url = `https://api.deezer.com/search/track?q=${encodeURIComponent(genre)}&limit=40&index=${startIndex}&order=RATING_DESC`
-    const response = await fetch(url, { next: { revalidate: 3600 } })
+    const response = await fetch(url, { cache: "no-store" })
 
     if (!response.ok) {
       return NextResponse.json({ error: "Deezer API error", data: [] }, { status: response.status })
