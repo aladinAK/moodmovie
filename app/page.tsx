@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { MovieList } from "@/components/movie-list"
@@ -112,6 +113,25 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-10 pt-5 px-4">
+
+      {/* Contenu statique pour le SEO — invisible à l'écran, lisible par Google */}
+      <section className="sr-only" aria-hidden="true">
+        <h1>MoodMovie — Découvrez films, séries, livres et musique selon votre humeur</h1>
+        <p>
+          MoodMovie est une application de recommandation de contenu basée sur votre humeur.
+          Choisissez votre état émotionnel et découvrez instantanément des films, séries télévisées,
+          livres et musique parfaitement adaptés à ce que vous ressentez.
+        </p>
+        <ul>
+          <li>😄 LAUGH — Films de comédie, séries comiques, livres d'humour, musique pop dansante</li>
+          <li>😢 CRY — Films dramatiques, séries drame, livres drama, soul &amp; blues</li>
+          <li>🤢 SHOCK — Films d'horreur, séries crime, livres horreur, heavy metal</li>
+          <li>😱 SCARE — Films thriller, séries mystère, livres thriller, dark ambient</li>
+          <li>😤 ENERGY — Films d'action, séries action &amp; aventure, livres action, hard rock</li>
+          <li>😲 SURPRISE — Films mystère, séries sci-fi &amp; fantaisie, livres mystère, indie rock</li>
+        </ul>
+        <p>Formats disponibles : Films, Séries TV, Livres, Musique. Favoris et &quot;Déjà vu/Lu&quot; sauvegardés localement.</p>
+      </section>
 
       {/* Barre sticky — format + mood + favorites, apparaît au scroll */}
       <div className={cn(
@@ -265,6 +285,29 @@ export default function Home() {
             </CardContent>
           </Card>
         )}
+
+        {/* Maillage interne SEO — liens vers les pages mood statiques */}
+        <nav className="mt-10 border-t border-white/10 pt-6">
+          <p className="text-xs text-white/30 uppercase tracking-widest mb-3 text-center">Explorer par humeur</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {[
+              { slug: 'joie',      emoji: '😄', label: 'Comédie' },
+              { slug: 'tristesse', emoji: '😢', label: 'Drame' },
+              { slug: 'choc',      emoji: '🤢', label: 'Horreur' },
+              { slug: 'peur',      emoji: '😱', label: 'Thriller' },
+              { slug: 'energie',   emoji: '😤', label: 'Action' },
+              { slug: 'surprise',  emoji: '😲', label: 'Mystère' },
+            ].map(({ slug, emoji, label }) => (
+              <Link
+                key={slug}
+                href={`/mood/${slug}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 text-xs transition-colors"
+              >
+                {emoji} {label}
+              </Link>
+            ))}
+          </div>
+        </nav>
 
         <FavoritesModal
           isOpen={isFavoritesModalOpen}
