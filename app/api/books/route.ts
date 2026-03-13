@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     const url = `https://www.googleapis.com/books/v1/volumes?q=subject:${subject}&maxResults=40&startIndex=${startIndex}&orderBy=${orderBy}&langRestrict=fr`
     
     const response = await fetch(url, {
-      next: { revalidate: 3600 },
+      cache: "no-store",
     })
 
     if (!response.ok) {

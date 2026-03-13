@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   try {
     const response = await fetch(
       `https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&with_genres=${genreId}&language=fr-FR&sort_by=${sort}&page=${page}&vote_average.gte=6&first_air_date.lte=${today}&vote_count.gte=50`,
-      { next: { revalidate: 3600 } }
+      { cache: "no-store" }
     )
 
     if (!response.ok) {
