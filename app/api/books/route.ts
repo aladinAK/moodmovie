@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
   try {
     // Construction de l'URL de l'API Google Books — on récupère 40 pour filtrer par rating ensuite
-    const url = `https://www.googleapis.com/books/v1/volumes?q=subject:${subject}&maxResults=40&startIndex=${startIndex}&orderBy=${orderBy}&langRestrict=fr`
+    const url = `https://www.googleapis.com/books/v1/volumes?q=subject:${subject}&maxResults=40&startIndex=${startIndex}&orderBy=${orderBy}`
     
     const response = await fetch(url, {
       cache: "no-store",

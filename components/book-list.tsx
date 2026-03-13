@@ -58,10 +58,28 @@ export function BookList({ subject }: BookListProps) {
         } else {
           setBooks(filtered)
         }
+      } else if (!append && index > 0) {
+        // Fallback : startIndex aléatoire vide → retry depuis 0
+        const res2 = await fetch(`/api/books?subject=${subject}&startIndex=0&orderBy=relevance`)
+        const data2 = await res2.json()
+        if (data2.items && data2.items.length > 0) {
+          const filtered2 = data2.items
+            .filter((book: Book) =>
+              book.title &&
+              (book.imageLinks?.thumbnail || book.imageLinks?.smallThumbnail) &&
+              (book.averageRating === undefined || book.averageRating >= 3.5)
+            )
+            .slice(0, 10)
+          setHasMore(data2.items.length >= 20)
+          setStartIndex(0)
+          setBooks(filtered2)
+        } else {
+          setBooks([])
+          setHasMore(false)
+        }
       } else {
         if (!append) setBooks([])
         setHasMore(false)
-        console.error("No books found or API error:", data.error || "Unknown error")
       }
     } catch (error) {
       console.error("Error fetching books:", error)
@@ -73,7 +91,7 @@ export function BookList({ subject }: BookListProps) {
   }, [subject])
 
   useEffect(() => {
-    const randomStart = Math.floor(Math.random() * 6) * 40
+    const randomStart = Math.floor(Math.random() * 3) * 40
     setBooks([])
     setStartIndex(randomStart)
     setHasMore(true)
