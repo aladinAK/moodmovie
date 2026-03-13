@@ -1,0 +1,231 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'philosopher';
+  src: url('/fonts/philosopher.ttf') format('truetype'); /* au lieu de woff2 */
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Après vos styles existants */
+.custom-font {
+  font-family: 'philosopher';
+}
+
+@layer components {
+  .radial-bg {
+    background: radial-gradient(circle at center, #03094A 0%, #1E1E1E 100%);
+    color: white;
+  }
+}
+@layer utilities {
+  .shadow-glow {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  }
+  
+  .line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+@layer base {
+  body {
+    @apply radial-bg text-foreground;
+  }
+  :root {
+
+    --background: 0 0% 100%;
+
+    --foreground: 0 0% 3.9%;
+
+    --card: 0 0% 100%;
+
+    --card-foreground: 0 0% 3.9%;
+
+    --popover: 0 0% 100%;
+
+    --popover-foreground: 0 0% 3.9%;
+
+    --primary: 0 0% 9%;
+
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 96.1%;
+
+    --secondary-foreground: 0 0% 9%;
+
+    --muted: 0 0% 96.1%;
+
+    --muted-foreground: 0 0% 45.1%;
+
+    --accent: 0 0% 96.1%;
+
+    --accent-foreground: 0 0% 9%;
+
+    --destructive: 0 84.2% 60.2%;
+
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 89.8%;
+
+    --input: 0 0% 89.8%;
+
+    --ring: 0 0% 3.9%;
+
+    --chart-1: 12 76% 61%;
+
+    --chart-2: 173 58% 39%;
+
+    --chart-3: 197 37% 24%;
+
+    --chart-4: 43 74% 66%;
+
+    --chart-5: 27 87% 67%;
+
+    --radius: 0.5rem
+  }
+  .dark {
+
+    --background: 0 0% 3.9%;
+
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 3.9%;
+
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 3.9%;
+
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%;
+
+    --primary-foreground: 0 0% 9%;
+
+    --secondary: 0 0% 14.9%;
+
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 14.9%;
+
+    --muted-foreground: 0 0% 63.9%;
+
+    --accent: 0 0% 14.9%;
+
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 14.9%;
+
+    --input: 0 0% 14.9%;
+
+    --ring: 0 0% 83.1%;
+
+    --chart-1: 220 70% 50%;
+
+    --chart-2: 160 60% 45%;
+
+    --chart-3: 30 80% 55%;
+
+    --chart-4: 280 65% 60%;
+
+    --chart-5: 340 75% 55%
+  }
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply radial-bg text-foreground;
+  }
+}
+/* Après vos styles existants */
+
+@keyframes float1 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+
+@keyframes float2 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(-2deg); }
+}
+
+@keyframes float3 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+}
+
+@layer utilities {
+  .animate-float-1 {
+    animation: float1 6s ease-in-out infinite;
+  }
+  .animate-float-2 {
+    animation: float2 7s ease-in-out infinite 0.5s;
+  }
+  .animate-float-3 {
+    animation: float3 5s ease-in-out infinite 1s;
+  }
+}
+/* Ajoutez ces classes après vos classes .radial-bg existantes */
+
+/* Couleurs de fond par humeur */
+.radial-bg-joy {
+  background: radial-gradient(circle at center, #FFB347 0%, #131313 100%);
+  color: white;
+}
+
+.radial-bg-sadness {
+  background: radial-gradient(circle at center, #1E3A8A 0%, #0F172A 100%);
+  color: white;
+}
+
+.radial-bg-disgust {
+  background: radial-gradient(circle at center, #166534 0%, #0F1F17 100%);
+  color: white;
+}
+
+.radial-bg-fear {
+  background: radial-gradient(circle at center, #4C1D95 0%, #110E1A 100%);
+  color: white;
+}
+
+.radial-bg-anger {
+  background: radial-gradient(circle at center, #991B1B 0%, #1B0F0F 100%);
+  color: white;
+}
+
+.radial-bg-surprise {
+  background: radial-gradient(circle at center, #0F766E 0%, #0C1516 100%);
+  color: white;
+}
+
+/* Transition douce pour le changement de fond */
+body {
+  transition: background 1.5s ease-in-out;
+}
+@keyframes subtle-pulse {
+  0%, 100% {
+    transform: scale(1.35);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+}
+
+.animate-subtle-pulse {
+  animation: subtle-pulse 5s ease-in-out infinite;
+}
