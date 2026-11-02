@@ -16,7 +16,9 @@ const WatchedContext = createContext<WatchedContextType | undefined>(undefined)
 export function WatchedProvider({ children }: { children: ReactNode }) {
   const [watched, setWatched] = useState<Movie[]>([])
 
+  // Lecture après hydratation volontaire : le rendu serveur n'a pas accès à localStorage
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setWatched(getWatched())
   }, [])
 

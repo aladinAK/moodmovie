@@ -229,3 +229,15 @@ body {
 .animate-subtle-pulse {
   animation: subtle-pulse 5s ease-in-out infinite;
 }
+
+/* Réglage système « réduire les animations » : coupe animations et transitions décoratives */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -21,11 +21,3 @@ export interface Book {
   infoLink?: string;
   previewLink?: string;
 }
-
-export interface BookSearchResponse {
-  items?: Array<{
-    id: string;
-    volumeInfo: Omit<Book, 'id'>;
-  }>;
-  totalItems: number;
-}

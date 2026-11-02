@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import Image from "next/image"
 import { Play, Pause, X } from "lucide-react"
@@ -8,11 +7,9 @@ import { useMusicPlayer } from "@/context/music-player-context"
 
 export function MusicMiniPlayer() {
   const { currentTrack, isPlaying, toggle, dismiss } = useMusicPlayer()
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => { setMounted(true) }, [])
-
-  if (!mounted || !currentTrack) return null
+  // currentTrack n'est défini qu'après une interaction côté client : document est alors disponible
+  if (!currentTrack) return null
 
   return createPortal(
     <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 px-4 py-3 rounded-2xl bg-black/85 border border-white/20 shadow-2xl w-[min(340px,calc(100vw-2rem))]">
@@ -40,14 +37,14 @@ export function MusicMiniPlayer() {
             ))}
           </div>
         ) : (
-          <p className="text-white/40 text-[10px] mt-1">En pause</p>
+          <p className="text-white/60 text-[10px] mt-1">En pause</p>
         )}
       </div>
 
       <button
         onClick={() => toggle(currentTrack)}
         className="rounded-full bg-white/20 hover:bg-white/30 p-2 transition-colors shrink-0"
-        aria-label={isPlaying ? "Pause" : "Play"}
+        aria-label={isPlaying ? "Mettre en pause" : "Lecture"}
       >
         {isPlaying
           ? <Pause className="h-4 w-4 text-white fill-white" />

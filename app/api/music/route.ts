@@ -10,7 +10,13 @@ export async function GET(request: Request) {
   }
 
   try {
-    const url = `https://api.deezer.com/search/track?q=${encodeURIComponent(genre)}&limit=40&index=${startIndex}&order=RATING_DESC`
+    const params = new URLSearchParams({
+      q: genre,
+      limit: "40",
+      index: startIndex,
+      order: "RATING_DESC",
+    })
+    const url = `https://api.deezer.com/search/track?${params}`
     const response = await fetch(url, { cache: "no-store" })
 
     if (!response.ok) {

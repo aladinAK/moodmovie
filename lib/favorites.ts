@@ -55,3 +55,10 @@ export function toggleFavorite(movie: Movie): boolean {
     return true;
   }
 }
+
+// Retirer plusieurs éléments des favoris en une seule écriture
+export function removeManyFromFavorites(ids: number[]): void {
+  const idSet = new Set(ids);
+  const newFavorites = getFavorites().filter(movie => !idSet.has(movie.id));
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+}

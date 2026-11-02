@@ -3,14 +3,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Film, Star, ArrowLeft } from 'lucide-react'
-
-const BASE_URL = 'https://moodmovie-by-aladin-akkari.vercel.app'
+import { BASE_URL } from '@/lib/site'
 
 const moodConfig = {
   joie: {
     key: 'joy',
     emoji: '😄',
-    label: 'LAUGH',
     title: 'Films de comédie pour rire et se sentir bien',
     description: 'Découvre les meilleures comédies pour te mettre de bonne humeur. Films drôles, légers et feel-good sélectionnés pour toi.',
     genreId: 35,
@@ -20,7 +18,6 @@ const moodConfig = {
   tristesse: {
     key: 'sadness',
     emoji: '😢',
-    label: 'CRY',
     title: 'Films dramatiques pour toucher le cœur',
     description: 'Laisse-toi emporter par les meilleurs films dramatiques. Des histoires profondes et émouvantes pour les moments de mélancolie.',
     genreId: 18,
@@ -30,7 +27,6 @@ const moodConfig = {
   choc: {
     key: 'disgust',
     emoji: '🤢',
-    label: 'SHOCK',
     title: 'Films d\'horreur pour frissonner et être choqué',
     description: 'Les meilleurs films d\'horreur pour te glacer le sang. Sélection de films qui vont te choquer et te surprendre.',
     genreId: 27,
@@ -40,7 +36,6 @@ const moodConfig = {
   peur: {
     key: 'fear',
     emoji: '😱',
-    label: 'SCARE',
     title: 'Films thriller pour avoir peur et être tenu en haleine',
     description: 'Les meilleurs thrillers pour te tenir en haleine. Suspense, tension et rebondissements garantis.',
     genreId: 53,
@@ -50,7 +45,6 @@ const moodConfig = {
   energie: {
     key: 'anger',
     emoji: '😤',
-    label: 'ENERGY',
     title: 'Films d\'action pour se sentir énergisé',
     description: 'Les meilleurs films d\'action pour booster ton énergie. Explosions, combats et adrénaline au rendez-vous.',
     genreId: 28,
@@ -60,7 +54,6 @@ const moodConfig = {
   surprise: {
     key: 'surprise',
     emoji: '😲',
-    label: 'SURPRISE',
     title: 'Films mystère pour être surpris et intrigué',
     description: 'Les meilleurs films de mystère pour te surprendre. Des intrigues captivantes avec des twists inattendus.',
     genreId: 9648,
@@ -112,7 +105,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       `meilleurs films ${config.genreName.toLowerCase()}`,
       `film ${config.key}`,
       config.title,
-      'recommendation film',
+      'recommandation film',
       'mood movie',
     ],
     alternates: { canonical: `${BASE_URL}/mood/${slug}` },
@@ -190,7 +183,7 @@ export default async function MoodPage({ params }: { params: Promise<{ slug: str
                       </span>
                     </div>
                     {movie.overview && (
-                      <p className="text-white/40 text-xs mt-2 line-clamp-3">{movie.overview}</p>
+                      <p className="text-white/60 text-xs mt-2 line-clamp-3">{movie.overview}</p>
                     )}
                   </div>
                 </article>

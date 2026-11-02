@@ -11,6 +11,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Movie ID is required" }, { status: 400 })
   }
 
+  // L'ID est injecté dans le chemin de l'URL TMDB : on n'accepte que des chiffres
+  if (!/^\d+$/.test(movieId)) {
+    return NextResponse.json({ error: "Invalid movie ID" }, { status: 400 })
+  }
+
   if (!API_KEY) {
     console.error("TMDB API key is missing. Please set the TMDB_API_KEY environment variable.")
     return NextResponse.json({ error: "API configuration error" }, { status: 500 })
@@ -20,7 +25,7 @@ export async function GET(request: Request) {
 
   try {
     const response = await fetch(
-      `https://api.themoviedb.org/3/${endpoint}/${movieId}/watch/providers?api_key=${API_KEY}`,
+      `https://api.themoviedb.org/3/${endpoint}/${movieId}/watch/providers?${new URLSearchParams({ api_key: API_KEY })}`,
       {
         next: { revalidate: 86400 }, // Cache pour 24 heures (les options de streaming changent moins souvent)
       }

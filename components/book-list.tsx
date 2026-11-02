@@ -7,12 +7,28 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Star, Heart, Eye, EyeOff, BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { BookDetailsModal } from "./book-details-modal"
+import { ListError } from "./list-error"
 import { useFavorites } from '@/context/favorites-context'
 import { useWatched } from '@/context/watched-context'
 import { Book } from "@/types/book"
+import { clickableProps } from "@/lib/utils"
 
 export interface BookListProps {
   subject: string
+}
+
+// Hash 53 bits (cyrb53) de l'ID Google Books : ID numérique stable et sans collision pratique
+function hashBookId(id: string): number {
+  let h1 = 0xdeadbeef
+  let h2 = 0x41c6ce57
+  for (let i = 0; i < id.length; i++) {
+    const ch = id.charCodeAt(i)
+    h1 = Math.imul(h1 ^ ch, 2654435761)
+    h2 = Math.imul(h2 ^ ch, 1597334677)
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909)
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909)
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0)
 }
 
 export function BookList({ subject }: BookListProps) {
@@ -23,19 +39,25 @@ export function BookList({ subject }: BookListProps) {
   const [hasMore, setHasMore] = useState(true)
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [error, setError] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const sentinelRef = useRef<HTMLDivElement>(null)
   const { isFavorite, toggleFavorite } = useFavorites()
   const { isWatched, toggleWatched } = useWatched()
 
   const fetchBooks = useCallback(async (index: number, append: boolean) => {
     if (append) setLoadingMore(true)
-    else setLoading(true)
+    else {
+      setLoading(true)
+      setError(false)
+    }
 
     try {
       const orderOptions = ['relevance', 'newest']
       const orderBy = orderOptions[Math.floor(Math.random() * orderOptions.length)]
       const timestamp = Date.now()
       const response = await fetch(`/api/books?subject=${subject}&startIndex=${index}&orderBy=${orderBy}&_=${timestamp}`)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const data = await response.json()
 
       if (data.items && data.items.length > 0) {
@@ -61,6 +83,7 @@ export function BookList({ subject }: BookListProps) {
       } else if (!append && index > 0) {
         // Fallback : startIndex aléatoire vide → retry depuis 0
         const res2 = await fetch(`/api/books?subject=${subject}&startIndex=0&orderBy=relevance`)
+        if (!res2.ok) throw new Error(`HTTP ${res2.status}`)
         const data2 = await res2.json()
         if (data2.items && data2.items.length > 0) {
           const filtered2 = data2.items
@@ -83,7 +106,10 @@ export function BookList({ subject }: BookListProps) {
       }
     } catch (error) {
       console.error("Error fetching books:", error)
-      if (!append) setBooks([])
+      if (!append) {
+        setBooks([])
+        setError(true)
+      }
     } finally {
       setLoading(false)
       setLoadingMore(false)
@@ -96,7 +122,7 @@ export function BookList({ subject }: BookListProps) {
     setStartIndex(randomStart)
     setHasMore(true)
     fetchBooks(randomStart, false)
-  }, [fetchBooks])
+  }, [fetchBooks, reloadKey])
 
   // Infinite scroll
   useEffect(() => {
@@ -113,9 +139,9 @@ export function BookList({ subject }: BookListProps) {
     return () => observer.disconnect()
   }, [loadingMore, loading, hasMore, startIndex, fetchBooks])
 
-  // Convertit un livre en Movie pour favoris/watched (IDs négatifs pour les livres)
+  // Convertit un livre en Movie pour favoris/watched (IDs négatifs pour les livres, jamais 0)
   const bookToMovie = (book: Book) => ({
-    id: -(parseInt(book.id.replace(/\D/g, '')) || Math.abs(book.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0))),
+    id: -(hashBookId(book.id) + 1),
     title: book.title,
     poster_path: (book.imageLinks?.thumbnail || book.imageLinks?.smallThumbnail || null)?.replace(/^http:/, 'https:') || null,
     vote_average: book.averageRating || 0,
@@ -144,11 +170,15 @@ export function BookList({ subject }: BookListProps) {
     )
   }
 
-  if (books.length === 0 && !loading) {
+  if (error) {
+    return <ListError onRetry={() => setReloadKey(k => k + 1)} />
+  }
+
+  if (books.length === 0) {
     return (
       <div className="text-center py-10">
         <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4 opacity-20" />
-        <p className="text-muted-foreground">No books found 😔.</p>
+        <p className="text-muted-foreground">Aucun livre trouvé 😔</p>
       </div>
     )
   }
@@ -164,8 +194,9 @@ export function BookList({ subject }: BookListProps) {
               className="overflow-hidden cursor-pointer bg-black/20 border-white/5
                         transition-all duration-300 ease-out
                         transform hover:scale-[1.03] hover:shadow-[0_10px_40px_rgba(0,0,0,0.3)]
-                        hover:border-white/20 hover:bg-black/30"
-              onClick={() => { setSelectedBook(book); setIsModalOpen(true) }}
+                        hover:border-white/20 hover:bg-black/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+              aria-label={book.title}
+              {...clickableProps(() => { setSelectedBook(book); setIsModalOpen(true) })}
             >
               <div className="relative aspect-[2/3] w-full overflow-hidden">
                 <Image
@@ -185,6 +216,7 @@ export function BookList({ subject }: BookListProps) {
                     className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8"
                     onClick={e => { e.stopPropagation(); toggleWatched(movieFormat) }}
                     title={isWatched(movieFormat.id) ? "Marquer comme non lu" : "Marquer comme lu"}
+                    aria-label={isWatched(movieFormat.id) ? "Marquer comme non lu" : "Marquer comme lu"}
                   >
                     {isWatched(movieFormat.id)
                       ? <EyeOff className="h-4 w-4 text-blue-400" />
@@ -198,6 +230,7 @@ export function BookList({ subject }: BookListProps) {
                     size="icon"
                     className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8"
                     onClick={e => { e.stopPropagation(); toggleFavorite(movieFormat) }}
+                    aria-label={isFavorite(movieFormat.id) ? "Retirer des favoris" : "Ajouter aux favoris"}
                   >
                     <Heart className={`h-4 w-4 ${isFavorite(movieFormat.id) ? "fill-red-500 text-red-500" : "text-white"}`} />
                   </Button>
@@ -207,10 +240,10 @@ export function BookList({ subject }: BookListProps) {
               <CardContent className="p-4">
                 <h3 className="font-medium text-white line-clamp-2 text-sm leading-tight mb-1">{book.title}</h3>
                 {book.authors && book.authors.length > 0 && (
-                  <p className="text-xs text-white/60 line-clamp-1 mb-2">by {book.authors.slice(0, 2).join(", ")}</p>
+                  <p className="text-xs text-white/60 line-clamp-1 mb-2">par {book.authors.slice(0, 2).join(", ")}</p>
                 )}
                 <div className="flex items-center justify-between text-xs text-white/70">
-                  <span>{book.publishedDate?.split("-")[0] || "N/A"}</span>
+                  <span>{book.publishedDate?.split("-")[0] || "—"}</span>
                   {book.averageRating && (
                     <div className="flex items-center">
                       <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 mr-1" />
@@ -237,7 +270,6 @@ export function BookList({ subject }: BookListProps) {
 
       {selectedBook && (
         <BookDetailsModal
-          bookId={selectedBook.id}
           bookTitle={selectedBook.title}
           bookDescription={selectedBook.description}
           bookAuthors={selectedBook.authors}

@@ -49,21 +49,25 @@ const moodMusicMap = {
   surprise: { genre: "indie rock",  name: "Indie Rock" },
 }
 
-const moodTextMap = {
-  default:  "...",
-  joy:      "LAUGH",
-  sadness:  "CRY",
-  disgust:  "BE SHOCKED",
-  fear:     "BE SCARED",
-  anger:    "FEEL ENERGIZED",
-  surprise: "BE SURPRISED",
+// Emoji, libellé de bulle et fin du titre « JE VEUX … » pour chaque humeur
+const moodMeta = {
+  joy:      { emoji: "😄", label: "RIRE",     headline: "RIRE" },
+  sadness:  { emoji: "😢", label: "PLEURER",  headline: "PLEURER" },
+  disgust:  { emoji: "🤢", label: "CHOC",     headline: "FRISSONNER" },
+  fear:     { emoji: "😱", label: "PEUR",     headline: "AVOIR PEUR" },
+  anger:    { emoji: "😤", label: "ÉNERGIE",  headline: "ME DÉFOULER" },
+  surprise: { emoji: "😲", label: "SURPRISE", headline: "ME LAISSER SURPRENDRE" },
 }
+
+type Mood = keyof typeof moodMeta
+
+const DEFAULT_HEADLINE = "..."
 
 type ContentType = 'movies' | 'shows' | 'books' | 'music'
 
 export default function Home() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
-  const [displayText, setDisplayText] = useState(moodTextMap.default)
+  const [displayText, setDisplayText] = useState(DEFAULT_HEADLINE)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false)
   const [contentType, setContentType] = useState<ContentType>('movies')
@@ -86,8 +90,8 @@ export default function Home() {
     if (isTransitioning) {
       const timer = setTimeout(() => {
         setDisplayText(selectedMood
-          ? moodTextMap[selectedMood as keyof typeof moodTextMap]
-          : moodTextMap.default)
+          ? moodMeta[selectedMood as Mood].headline
+          : DEFAULT_HEADLINE)
         setIsTransitioning(false)
       }, 400)
       return () => clearTimeout(timer)
@@ -105,17 +109,17 @@ export default function Home() {
   }, [selectedMood])
 
   const contentButtons: { type: ContentType; icon: React.ReactNode; label: string }[] = [
-    { type: 'movies', icon: <Film className="h-4 w-4" />, label: 'Movies' },
-    { type: 'shows',  icon: <Tv className="h-4 w-4" />,   label: 'Shows' },
-    { type: 'books',  icon: <BookOpen className="h-4 w-4" />, label: 'Books' },
-    { type: 'music',  icon: <Music className="h-4 w-4" />, label: 'Music' },
+    { type: 'movies', icon: <Film className="h-4 w-4" />, label: 'Films' },
+    { type: 'shows',  icon: <Tv className="h-4 w-4" />,   label: 'Séries' },
+    { type: 'books',  icon: <BookOpen className="h-4 w-4" />, label: 'Livres' },
+    { type: 'music',  icon: <Music className="h-4 w-4" />, label: 'Musique' },
   ]
 
   return (
     <div className="min-h-screen pb-10 pt-5 px-4">
 
-      {/* Contenu statique pour le SEO — invisible à l'écran, lisible par Google */}
-      <section className="sr-only" aria-hidden="true">
+      {/* Contenu statique pour le SEO — invisible à l'écran, lu par Google et les lecteurs d'écran */}
+      <section className="sr-only">
         <h1>MoodMovie — Découvrez films, séries, livres et musique selon votre humeur</h1>
         <p>
           MoodMovie est une application de recommandation de contenu basée sur votre humeur.
@@ -123,11 +127,11 @@ export default function Home() {
           livres et musique parfaitement adaptés à ce que vous ressentez.
         </p>
         <ul>
-          <li>😄 LAUGH — Films de comédie, séries comiques, livres d'humour, musique pop dansante</li>
-          <li>😢 CRY — Films dramatiques, séries drame, livres drama, soul &amp; blues</li>
-          <li>🤢 SHOCK — Films d'horreur, séries crime, livres horreur, heavy metal</li>
-          <li>😱 SCARE — Films thriller, séries mystère, livres thriller, dark ambient</li>
-          <li>😤 ENERGY — Films d'action, séries action &amp; aventure, livres action, hard rock</li>
+          <li>😄 RIRE — Films de comédie, séries comiques, livres d&apos;humour, musique pop dansante</li>
+          <li>😢 PLEURER — Films dramatiques, séries drame, livres drame, soul &amp; blues</li>
+          <li>🤢 CHOC — Films d&apos;horreur, séries crime, livres horreur, heavy metal</li>
+          <li>😱 PEUR — Films thriller, séries mystère, livres thriller, dark ambient</li>
+          <li>😤 ÉNERGIE — Films d&apos;action, séries action &amp; aventure, livres action, hard rock</li>
           <li>😲 SURPRISE — Films mystère, séries sci-fi &amp; fantaisie, livres mystère, indie rock</li>
         </ul>
         <p>Formats disponibles : Films, Séries TV, Livres, Musique. Favoris et &quot;Déjà vu/Lu&quot; sauvegardés localement.</p>
@@ -138,7 +142,8 @@ export default function Home() {
         "fixed top-0 left-0 right-0 z-40 backdrop-blur-md bg-black/70 border-b border-white/10 px-4 py-2.5 transition-all duration-300",
         showStickyBar ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
       )}>
-        <div className="max-w-4xl mx-auto flex justify-between items-center gap-2">
+        {/* Sur mobile : deux lignes (formats, puis humeurs + favoris) pour éviter tout débordement */}
+        <div className="max-w-4xl mx-auto flex flex-wrap sm:flex-nowrap justify-center sm:justify-between items-center gap-2">
           <div className="flex gap-1.5">
             {contentButtons.map(({ type, icon, label }) => (
               <button
@@ -150,6 +155,8 @@ export default function Home() {
                     : "bg-black/40 text-white/70 border-white/20 hover:bg-white/10 hover:text-white"
                 )}
                 onClick={() => setContentType(type)}
+                aria-label={label}
+                aria-pressed={contentType === type}
               >
                 {icon}
                 <span className="max-sm:hidden">{label}</span>
@@ -157,26 +164,29 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="flex items-center gap-1.5">
-            {Object.keys(moodGenreMap).map((mood) => (
+          <div className="flex flex-wrap justify-center items-center gap-1 sm:gap-1.5">
+            {(Object.keys(moodMeta) as Mood[]).map((mood) => (
               <button
                 key={mood}
                 onClick={() => handleMoodSelect(mood)}
                 className={cn(
-                  "rounded-full w-9 h-9 text-base transition-all duration-300 min-w-[44px]",
+                  "rounded-full w-9 h-9 text-base transition-all duration-300 sm:min-w-[44px]",
                   selectedMood === mood
                     ? "bg-white/40 border-2 border-white scale-110"
                     : "bg-white/10 border border-white/20 hover:bg-white/20"
                 )}
-                title={mood.toUpperCase()}
+                title={moodMeta[mood].label}
+                aria-label={moodMeta[mood].label}
+                aria-pressed={selectedMood === mood}
               >
-                {mood === "joy" ? "😄" : mood === "sadness" ? "😢" : mood === "disgust" ? "🤢" : mood === "fear" ? "😱" : mood === "anger" ? "😤" : "😲"}
+                {moodMeta[mood].emoji}
               </button>
             ))}
             <Button
               variant="outline"
               className="gap-1.5 px-3 h-9 bg-black/40 border-white/20 rounded-full hover:text-white hover:bg-black/60 min-w-[44px]"
               onClick={() => setIsFavoritesModalOpen(true)}
+              aria-label="Favoris"
             >
               <Heart className="h-4 w-4" />
             </Button>
@@ -198,6 +208,8 @@ export default function Home() {
                     : "bg-black/40 backdrop-blur-sm text-white/70 border-white/20 hover:bg-white/10 hover:text-white"
                 )}
                 onClick={() => setContentType(type)}
+                aria-label={label}
+                aria-pressed={contentType === type}
               >
                 {icon}
                 <span className="max-sm:hidden">{label}</span>
@@ -208,14 +220,15 @@ export default function Home() {
             variant="outline"
             className="gap-2 px-4 h-10 bg-black/40 backdrop-blur-sm border-white/20 rounded-full hover:text-white hover:bg-black/60 min-w-[44px]"
             onClick={() => setIsFavoritesModalOpen(true)}
+            aria-label="Favoris"
           >
             <Heart className="h-4 w-4" />
-            <span className="max-sm:hidden">Favorites</span>
+            <span className="max-sm:hidden">Favoris</span>
           </Button>
         </div>
         <div className="relative flex flex-col items-center my-10 max-sm:mt-0 max-sm:mb-6">
           <h1 className="custom-font text-7xl max-sm:text-3xl text-center font-bold text-white z-10 mb-5">
-            I WANT TO <br />
+            JE VEUX <br />
             <span
               className={cn(
                 "text-6xl max-sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600",
@@ -228,12 +241,13 @@ export default function Home() {
           </h1>
 
           <div className="w-full flex justify-center flex-wrap gap-3 items-center mt-8">
-            {Object.entries(moodGenreMap).map(([mood], index) => {
-              const animations = ["animate-float-1", "animate-float-2", "animate-float-3"]
+            {(Object.keys(moodMeta) as Mood[]).map((mood, index) => {
+              const animations = ["motion-safe:animate-float-1", "motion-safe:animate-float-2", "motion-safe:animate-float-3"]
               return (
                 <button
                   key={mood}
                   onClick={() => handleMoodSelect(mood)}
+                  aria-pressed={selectedMood === mood}
                   className={cn(
                     "backdrop-blur-md shadow-glow rounded-full w-24 h-24",
                     "flex items-center justify-center text-center custom-font text-xs font-medium",
@@ -244,7 +258,7 @@ export default function Home() {
                       : "bg-white/10 border border-white/30 text-white/70 hover:bg-white/15 hover:scale-110"
                   )}
                 >
-                  {mood === "joy" ? "LAUGH" : mood === "sadness" ? "CRY" : mood === "disgust" ? "SHOCK" : mood === "fear" ? "SCARE" : mood === "anger" ? "ENERGY" : "SURPRISE"}
+                  {moodMeta[mood].label}
                 </button>
               )
             })}
@@ -258,7 +272,7 @@ export default function Home() {
                 <Card className="backdrop-blur-md bg-black/30 border-white/10">
                   <CardContent className="pt-4">
                     {/* Label genre actif */}
-                    <p className="text-xs text-white/40 uppercase tracking-widest mb-4">
+                    <p className="text-xs text-white/60 uppercase tracking-widest mb-4">
                       {contentType === 'movies' ? genre.name
                         : contentType === 'shows' ? moodShowMap[mood as keyof typeof moodShowMap].name
                         : contentType === 'books' ? moodBookMap[mood as keyof typeof moodBookMap].name
@@ -277,10 +291,10 @@ export default function Home() {
           <Card className="backdrop-blur-md bg-black/30 border-white/10">
             <CardContent className="pt-6 text-center py-16">
               <h2 className="text-2xl text-white custom-font mb-4">
-                Select your mood above to find {contentType === 'movies' ? 'movies' : contentType === 'shows' ? 'shows' : contentType === 'books' ? 'books' : 'music'}
+                Choisis ton humeur pour découvrir {contentType === 'movies' ? 'des films' : contentType === 'shows' ? 'des séries' : contentType === 'books' ? 'des livres' : 'de la musique'}
               </h2>
               <p className="text-white/70">
-                Choose one of the mood bubbles above to discover content that matches your current emotional state.
+                Clique sur une des bulles ci-dessus pour trouver du contenu adapté à ce que tu ressens.
               </p>
             </CardContent>
           </Card>
@@ -288,7 +302,7 @@ export default function Home() {
 
         {/* Maillage interne SEO — liens vers les pages mood statiques */}
         <nav className="mt-10 border-t border-white/10 pt-6">
-          <p className="text-xs text-white/30 uppercase tracking-widest mb-3 text-center">Explorer par humeur</p>
+          <p className="text-xs text-white/60 uppercase tracking-widest mb-3 text-center">Explorer par humeur</p>
           <div className="flex flex-wrap justify-center gap-2">
             {[
               { slug: 'joie',      emoji: '😄', label: 'Comédie' },
@@ -301,7 +315,7 @@ export default function Home() {
               <Link
                 key={slug}
                 href={`/mood/${slug}`}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 text-xs transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 text-xs transition-colors"
               >
                 {emoji} {label}
               </Link>

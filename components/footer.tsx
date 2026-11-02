@@ -4,16 +4,15 @@ export function Footer() {
       <div className=" flex items-center justify-center flex-col gap-2">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
-            Made By
+            Créé par
           </span>
           <a href="https://aladinakkari.ca" className="text-sm text-white hover:underline">
             Aladinakkari
           </a>
         </div>
-        <div className=" text-center text-[7px] text-muted-foreground">
-          <a  href="https://www.themoviedb.org" 
-            target="_blank" >
-            This site uses the TMDB API but is not endorsed or certified by TMDB.
+        <div className="text-center text-xs text-muted-foreground px-4">
+          <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">
+            Ce site utilise l&apos;API TMDB sans être approuvé ni certifié par TMDB.
           </a>
         </div>
       </div>

@@ -8,6 +8,8 @@ import { Music, Play, Pause, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Track } from "@/types/track"
 import { useMusicPlayer } from "@/context/music-player-context"
+import { clickableProps } from "@/lib/utils"
+import { ListError } from "./list-error"
 
 export interface MusicListProps {
   genre: string
@@ -19,16 +21,22 @@ export function MusicList({ genre }: MusicListProps) {
   const [loadingMore, setLoadingMore] = useState(false)
   const [startIndex, setStartIndex] = useState(0)
   const [hasMore, setHasMore] = useState(true)
+  const [error, setError] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const sentinelRef = useRef<HTMLDivElement>(null)
   const { currentTrack, isPlaying, toggle } = useMusicPlayer()
 
   const fetchTracks = useCallback(async (index: number, append: boolean) => {
     if (append) setLoadingMore(true)
-    else setLoading(true)
+    else {
+      setLoading(true)
+      setError(false)
+    }
 
     try {
       const timestamp = Date.now()
       const response = await fetch(`/api/music?genre=${encodeURIComponent(genre)}&startIndex=${index}&_=${timestamp}`)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const data = await response.json()
 
       const newTracks: Track[] = (data.data || []).filter(
@@ -51,6 +59,7 @@ export function MusicList({ genre }: MusicListProps) {
       }
     } catch (error) {
       console.error("Error fetching music:", error)
+      if (!append) setError(true)
     } finally {
       setLoading(false)
       setLoadingMore(false)
@@ -63,7 +72,7 @@ export function MusicList({ genre }: MusicListProps) {
     setStartIndex(randomStart)
     setHasMore(true)
     fetchTracks(randomStart, false)
-  }, [fetchTracks])
+  }, [fetchTracks, reloadKey])
 
   // Infinite scroll
   useEffect(() => {
@@ -98,11 +107,15 @@ export function MusicList({ genre }: MusicListProps) {
     )
   }
 
+  if (error) {
+    return <ListError onRetry={() => setReloadKey(k => k + 1)} />
+  }
+
   if (tracks.length === 0) {
     return (
       <div className="text-center py-10">
         <Music className="mx-auto h-12 w-12 text-muted-foreground mb-4 opacity-20" />
-        <p className="text-muted-foreground">No tracks found 😔.</p>
+        <p className="text-muted-foreground">Aucun morceau trouvé 😔</p>
       </div>
     )
   }
@@ -122,8 +135,9 @@ export function MusicList({ genre }: MusicListProps) {
                         hover:border-white/20 hover:bg-black/30"
             >
               <div
-                className="relative aspect-square w-full overflow-hidden cursor-pointer"
-                onClick={() => toggle(track)}
+                className="relative aspect-square w-full overflow-hidden cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                aria-label={`${playing ? "Mettre en pause" : "Écouter"} ${track.title} — ${track.artist.name}`}
+                {...clickableProps(() => toggle(track))}
               >
                 <Image
                   src={track.album.cover_medium}
@@ -149,7 +163,7 @@ export function MusicList({ genre }: MusicListProps) {
                     {[...Array(4)].map((_, i) => (
                       <div
                         key={i}
-                        className="w-[3px] bg-white rounded-full animate-bounce"
+                        className="w-[3px] bg-white rounded-full motion-safe:animate-bounce"
                         style={{ height: `${8 + (i % 3) * 4}px`, animationDelay: `${i * 80}ms` }}
                       />
                     ))}
@@ -161,8 +175,9 @@ export function MusicList({ genre }: MusicListProps) {
                     variant="ghost"
                     size="icon"
                     className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8"
-                    onClick={e => { e.stopPropagation(); window.open(track.link, '_blank') }}
+                    onClick={e => { e.stopPropagation(); window.open(track.link, '_blank', 'noopener,noreferrer') }}
                     title="Ouvrir sur Deezer"
+                    aria-label="Ouvrir sur Deezer"
                   >
                     <ExternalLink className="h-4 w-4 text-white" />
                   </Button>

@@ -7,10 +7,12 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Star, Heart, Eye, EyeOff, Tv } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { WatchProvidersModal } from "./watch-providers-modal"
+import { ListError } from "./list-error"
 import { useFavorites } from '@/context/favorites-context'
 import { useWatched } from '@/context/watched-context'
 import { Show } from "@/types/show"
 import { Movie } from "@/types/movie"
+import { clickableProps } from "@/lib/utils"
 
 export interface ShowListProps {
   genreId: number
@@ -41,30 +43,40 @@ export function ShowList({ genreId }: ShowListProps) {
   const [sort, setSort] = useState('')
   const [selectedShow, setSelectedShow] = useState<Show | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [error, setError] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const sentinelRef = useRef<HTMLDivElement>(null)
   const { isFavorite, toggleFavorite } = useFavorites()
   const { isWatched, toggleWatched } = useWatched()
 
   const fetchShows = useCallback(async (pageNumber: number, sortMethod: string, append: boolean) => {
     if (append) setLoadingMore(true)
-    else setLoading(true)
+    else {
+      setLoading(true)
+      setError(false)
+    }
 
     try {
       const timestamp = Date.now()
       const response = await fetch(`/api/shows?genreId=${genreId}&page=${pageNumber}&sort=${sortMethod}&_=${timestamp}`)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const data = await response.json()
 
       if (data.results && data.results.length > 0) {
         setTotalPages(data.total_pages || 1)
         setPage(pageNumber)
         if (append) {
-          setShows(prev => [...prev, ...data.results.slice(0, 10)])
+          setShows(prev => {
+            const ids = new Set(prev.map((s: Show) => s.id))
+            return [...prev, ...data.results.filter((s: Show) => !ids.has(s.id))]
+          })
         } else {
           setShows(data.results.slice(0, 10))
         }
       } else if (!append && pageNumber > 1) {
         // Fallback: page aléatoire vide → retry page 1
         const res2 = await fetch(`/api/shows?genreId=${genreId}&page=1&sort=${sortMethod}&_=${timestamp}`)
+        if (!res2.ok) throw new Error(`HTTP ${res2.status}`)
         const data2 = await res2.json()
         if (data2.results && data2.results.length > 0) {
           setTotalPages(data2.total_pages || 1)
@@ -74,6 +86,7 @@ export function ShowList({ genreId }: ShowListProps) {
       }
     } catch (error) {
       console.error("Error fetching shows:", error)
+      if (!append) setError(true)
     } finally {
       setLoading(false)
       setLoadingMore(false)
@@ -84,7 +97,7 @@ export function ShowList({ genreId }: ShowListProps) {
     const initialSort = SORT_METHODS[Math.floor(Math.random() * SORT_METHODS.length)]
     setSort(initialSort)
     fetchShows(randomPage(), initialSort, false)
-  }, [fetchShows])
+  }, [fetchShows, reloadKey])
 
   // Infinite scroll
   useEffect(() => {
@@ -122,11 +135,15 @@ export function ShowList({ genreId }: ShowListProps) {
     )
   }
 
+  if (error) {
+    return <ListError onRetry={() => setReloadKey(k => k + 1)} />
+  }
+
   if (shows.length === 0) {
     return (
       <div className="text-center py-10">
         <Tv className="mx-auto h-12 w-12 text-muted-foreground mb-4 opacity-20" />
-        <p className="text-muted-foreground">No shows found 😔.</p>
+        <p className="text-muted-foreground">Aucune série trouvée 😔</p>
       </div>
     )
   }
@@ -142,8 +159,9 @@ export function ShowList({ genreId }: ShowListProps) {
               className="overflow-hidden cursor-pointer bg-black/20 border-white/5
                         transition-all duration-300 ease-out
                         transform hover:scale-[1.03] hover:shadow-[0_10px_40px_rgba(0,0,0,0.3)]
-                        hover:border-white/20 hover:bg-black/30"
-              onClick={() => { setSelectedShow(show); setIsModalOpen(true) }}
+                        hover:border-white/20 hover:bg-black/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+              aria-label={show.name}
+              {...clickableProps(() => { setSelectedShow(show); setIsModalOpen(true) })}
             >
               <div className="relative aspect-[2/3] w-full overflow-hidden">
                 <Image
@@ -163,6 +181,7 @@ export function ShowList({ genreId }: ShowListProps) {
                     className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8"
                     onClick={e => { e.stopPropagation(); toggleWatched(movieFormat) }}
                     title={isWatched(show.id) ? "Marquer comme non vu" : "Marquer comme vu"}
+                    aria-label={isWatched(show.id) ? "Marquer comme non vu" : "Marquer comme vu"}
                   >
                     {isWatched(show.id)
                       ? <EyeOff className="h-4 w-4 text-blue-400" />
@@ -176,6 +195,7 @@ export function ShowList({ genreId }: ShowListProps) {
                     size="icon"
                     className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8"
                     onClick={e => { e.stopPropagation(); toggleFavorite(movieFormat) }}
+                    aria-label={isFavorite(show.id) ? "Retirer des favoris" : "Ajouter aux favoris"}
                   >
                     <Heart className={`h-4 w-4 ${isFavorite(show.id) ? "fill-red-500 text-red-500" : "text-white"}`} />
                   </Button>
@@ -185,7 +205,7 @@ export function ShowList({ genreId }: ShowListProps) {
               <CardContent className="p-4">
                 <h3 className="font-medium text-white line-clamp-1">{show.name}</h3>
                 <div className="flex items-center justify-between mt-2 text-sm text-white/70">
-                  <span>{show.first_air_date?.split("-")[0] || "N/A"}</span>
+                  <span>{show.first_air_date?.split("-")[0] || "—"}</span>
                   <div className="flex items-center">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
                     <span>{show.vote_average.toFixed(1)}</span>

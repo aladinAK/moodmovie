@@ -1,6 +1,5 @@
 import { MetadataRoute } from 'next'
-
-const BASE_URL = 'https://moodmovie-by-aladin-akkari.vercel.app'
+import { BASE_URL } from '@/lib/site'
 
 export default function robots(): MetadataRoute.Robots {
   return {

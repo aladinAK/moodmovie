@@ -12,6 +12,7 @@ import { useWatched } from "@/context/watched-context"
 import { WatchProvidersModal } from "./watch-providers-modal"
 import { BookDetailsModal } from "./book-details-modal"
 import { Movie } from "@/types/movie"
+import { clickableProps } from "@/lib/utils"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +25,6 @@ import {
 } from "@/components/ui/alert-dialog"
 
 interface BookData {
-  id: string
   title: string
   description?: string
   imageUrl?: string
@@ -38,7 +38,7 @@ interface FavoritesModalProps {
 }
 
 export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
-  const { favorites, toggleFavorite, clearAllFavorites } = useFavorites()
+  const { favorites, toggleFavorite, removeFavorites } = useFavorites()
   const { watched, toggleWatched, clearAllWatched } = useWatched()
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
   const [selectedBook, setSelectedBook] = useState<BookData | null>(null)
@@ -62,7 +62,6 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
 
   const handleBookClick = (book: Movie) => {
     const bookData = {
-      id: book.id.toString(),
       title: book.title,
       description: book.overview,
       imageUrl: book.poster_path || undefined,
@@ -73,15 +72,27 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
     setIsBookModalOpen(true)
   }
 
+  // « Effacer » ne vide que l'onglet affiché
   const activeItemsCount = activeTab === "movies" ? movieFavorites.length + showFavorites.length
     : activeTab === "books" ? bookFavorites.length
     : watched.length
+
+  const clearDialogTitle = activeTab === "movies" ? "Effacer les films et séries favoris ?"
+    : activeTab === "books" ? "Effacer les livres favoris ?"
+    : "Effacer la liste des vus et lus ?"
+
+  const handleClear = () => {
+    if (activeTab === "watched") clearAllWatched()
+    else if (activeTab === "books") removeFavorites(bookFavorites.map(item => item.id))
+    else removeFavorites([...movieFavorites, ...showFavorites].map(item => item.id))
+    setIsConfirmDialogOpen(false)
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-black/80 backdrop-blur-md border-white/10">
         <DialogHeader className="relative">
-          <DialogTitle className="text-2xl custom-font font-bold">My Collection</DialogTitle>
+          <DialogTitle className="text-2xl custom-font font-bold">Ma collection</DialogTitle>
 
           {activeItemsCount > 0 && (
             <Button
@@ -89,28 +100,29 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
               size="sm"
               className="absolute right-6 top-0 gap-1 bg-black/40 backdrop-blur-sm border-white/20 hover:bg-black/60 hover:text-red-400"
               onClick={() => setIsConfirmDialogOpen(true)}
+              aria-label="Effacer"
             >
               <Trash2 className="h-4 w-4" />
-              <span className="max-sm:hidden">Clear</span>
+              <span className="max-sm:hidden">Effacer</span>
             </Button>
           )}
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-4 bg-black/20">
-            <TabsTrigger value="movies" className="flex items-center gap-2">
+            <TabsTrigger value="movies" className="flex items-center gap-2" aria-label="Films et séries">
               <Film className="h-4 w-4" />
-              <span className="max-sm:hidden">Movies & Shows</span>
+              <span className="max-sm:hidden">Films et séries</span>
               <span>({movieFavorites.length + showFavorites.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="books" className="flex items-center gap-2">
+            <TabsTrigger value="books" className="flex items-center gap-2" aria-label="Livres">
               <BookOpen className="h-4 w-4" />
-              <span className="max-sm:hidden">Books</span>
+              <span className="max-sm:hidden">Livres</span>
               <span>({bookFavorites.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="watched" className="flex items-center gap-2">
+            <TabsTrigger value="watched" className="flex items-center gap-2" aria-label="Vus et lus">
               <Eye className="h-4 w-4" />
-              <span className="max-sm:hidden">Watched</span>
+              <span className="max-sm:hidden">Vus et lus</span>
               <span>({watched.length})</span>
             </TabsTrigger>
           </TabsList>
@@ -120,8 +132,8 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
             {movieFavorites.length === 0 && showFavorites.length === 0 ? (
               <div className="py-12 text-center">
                 <Film className="mx-auto h-12 w-12 text-muted-foreground mb-4 opacity-20" />
-                <h2 className="text-xl text-white custom-font mb-2">No favorites yet</h2>
-                <p className="text-white/70">Add movies or shows to your favorites by clicking the heart icon.</p>
+                <h2 className="text-xl text-white custom-font mb-2">Aucun favori pour le moment</h2>
+                <p className="text-white/70">Ajoute des films ou des séries à tes favoris avec l&apos;icône cœur.</p>
               </div>
             ) : (
               <div className="space-y-6">
@@ -129,7 +141,7 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
                   <div>
                     {showFavorites.length > 0 && (
                       <h3 className="text-sm font-medium text-white/50 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <Film className="h-3 w-3" /> Movies ({movieFavorites.length})
+                        <Film className="h-3 w-3" /> Films ({movieFavorites.length})
                       </h3>
                     )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -144,18 +156,18 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
                               onClick={() => handleMovieClick(movie)}
                             />
                             <div className="absolute top-2 right-2 z-10">
-                              <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleFavorite(movie)}>
+                              <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleFavorite(movie)} aria-label="Retirer des favoris">
                                 <Heart className="h-4 w-4 fill-red-500 text-red-500" />
                               </Button>
                             </div>
                           </div>
-                          <CardContent className="p-4 cursor-pointer" onClick={() => handleMovieClick(movie)}>
+                          <CardContent className="p-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60" {...clickableProps(() => handleMovieClick(movie))}>
                             <h3 className="font-medium text-white line-clamp-1">{movie.title}</h3>
                             <div className="flex items-center justify-between mt-2 text-sm text-white/70">
-                              <span>{movie.release_date?.split("-")[0] || "N/A"}</span>
+                              <span>{movie.release_date?.split("-")[0] || "—"}</span>
                               <div className="flex items-center">
                                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
-                                <span>{movie.vote_average?.toFixed(1) || "N/A"}</span>
+                                <span>{movie.vote_average?.toFixed(1) || "—"}</span>
                               </div>
                             </div>
                           </CardContent>
@@ -167,7 +179,7 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
                 {showFavorites.length > 0 && (
                   <div>
                     <h3 className="text-sm font-medium text-white/50 uppercase tracking-wider mb-3 flex items-center gap-2">
-                      <Tv className="h-3 w-3" /> Shows ({showFavorites.length})
+                      <Tv className="h-3 w-3" /> Séries ({showFavorites.length})
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {showFavorites.map((show) => (
@@ -181,18 +193,18 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
                               onClick={() => handleMovieClick(show)}
                             />
                             <div className="absolute top-2 right-2 z-10">
-                              <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleFavorite(show)}>
+                              <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleFavorite(show)} aria-label="Retirer des favoris">
                                 <Heart className="h-4 w-4 fill-red-500 text-red-500" />
                               </Button>
                             </div>
                           </div>
-                          <CardContent className="p-4 cursor-pointer" onClick={() => handleMovieClick(show)}>
+                          <CardContent className="p-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60" {...clickableProps(() => handleMovieClick(show))}>
                             <h3 className="font-medium text-white line-clamp-1">{show.title}</h3>
                             <div className="flex items-center justify-between mt-2 text-sm text-white/70">
-                              <span>{show.release_date?.split("-")[0] || "N/A"}</span>
+                              <span>{show.release_date?.split("-")[0] || "—"}</span>
                               <div className="flex items-center">
                                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
-                                <span>{show.vote_average?.toFixed(1) || "N/A"}</span>
+                                <span>{show.vote_average?.toFixed(1) || "—"}</span>
                               </div>
                             </div>
                           </CardContent>
@@ -210,8 +222,8 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
             {bookFavorites.length === 0 ? (
               <div className="py-12 text-center">
                 <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4 opacity-20" />
-                <h2 className="text-xl text-white custom-font mb-2">No favorite books yet</h2>
-                <p className="text-white/70">Add books to your favorites by clicking the heart icon.</p>
+                <h2 className="text-xl text-white custom-font mb-2">Aucun livre favori pour le moment</h2>
+                <p className="text-white/70">Ajoute des livres à tes favoris avec l&apos;icône cœur.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -227,15 +239,15 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
                         onClick={() => handleBookClick(book)}
                       />
                       <div className="absolute top-2 right-2 z-10">
-                        <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleFavorite(book)}>
+                        <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleFavorite(book)} aria-label="Retirer des favoris">
                           <Heart className="h-4 w-4 fill-red-500 text-red-500" />
                         </Button>
                       </div>
                     </div>
-                    <CardContent className="p-4 cursor-pointer" onClick={() => handleBookClick(book)}>
+                    <CardContent className="p-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60" {...clickableProps(() => handleBookClick(book))}>
                       <h3 className="font-medium text-white line-clamp-2 text-sm leading-tight mb-1">{book.title}</h3>
                       <div className="flex items-center justify-between text-xs text-white/70">
-                        <span>{book.release_date?.split("-")[0] || "N/A"}</span>
+                        <span>{book.release_date?.split("-")[0] || "—"}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -249,15 +261,15 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
             {watched.length === 0 ? (
               <div className="py-12 text-center">
                 <Eye className="mx-auto h-12 w-12 text-muted-foreground mb-4 opacity-20" />
-                <h2 className="text-xl text-white custom-font mb-2">Nothing watched yet</h2>
-                <p className="text-white/70">Mark movies, shows or books as watched with the eye icon.</p>
+                <h2 className="text-xl text-white custom-font mb-2">Rien de vu ni de lu pour le moment</h2>
+                <p className="text-white/70">Marque films, séries et livres comme vus ou lus avec l&apos;icône œil.</p>
               </div>
             ) : (
               <div className="space-y-6">
                 {watchedMovies.length > 0 && (
                   <div>
                     <h3 className="text-sm font-medium text-white/50 uppercase tracking-wider mb-3 flex items-center gap-2">
-                      <Film className="h-3 w-3" /> Movies ({watchedMovies.length})
+                      <Film className="h-3 w-3" /> Films ({watchedMovies.length})
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {watchedMovies.map((movie) => (
@@ -272,14 +284,14 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
                               onClick={() => handleMovieClick(movie)}
                             />
                             <div className="absolute top-2 right-2 z-10">
-                              <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleWatched(movie)}>
+                              <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleWatched(movie)} aria-label="Marquer comme non vu">
                                 <Eye className="h-4 w-4 text-blue-400" />
                               </Button>
                             </div>
                           </div>
-                          <CardContent className="p-4 cursor-pointer" onClick={() => handleMovieClick(movie)}>
+                          <CardContent className="p-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60" {...clickableProps(() => handleMovieClick(movie))}>
                             <h3 className="font-medium text-white line-clamp-1">{movie.title}</h3>
-                            <span className="text-xs text-white/50">{movie.release_date?.split("-")[0] || "N/A"}</span>
+                            <span className="text-xs text-white/50">{movie.release_date?.split("-")[0] || "—"}</span>
                           </CardContent>
                         </Card>
                       ))}
@@ -290,7 +302,7 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
                 {watchedShows.length > 0 && (
                   <div>
                     <h3 className="text-sm font-medium text-white/50 uppercase tracking-wider mb-3 flex items-center gap-2">
-                      <Film className="h-3 w-3" /> Shows ({watchedShows.length})
+                      <Tv className="h-3 w-3" /> Séries ({watchedShows.length})
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {watchedShows.map((show) => (
@@ -301,17 +313,18 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
                               alt={show.title}
                               fill
                               sizes="(max-width: 768px) 100vw, 33vw"
-                              className="object-cover"
+                              className="object-cover cursor-pointer"
+                              onClick={() => handleMovieClick(show)}
                             />
                             <div className="absolute top-2 right-2 z-10">
-                              <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleWatched(show)}>
+                              <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleWatched(show)} aria-label="Marquer comme non vu">
                                 <Eye className="h-4 w-4 text-blue-400" />
                               </Button>
                             </div>
                           </div>
-                          <CardContent className="p-4">
+                          <CardContent className="p-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60" {...clickableProps(() => handleMovieClick(show))}>
                             <h3 className="font-medium text-white line-clamp-1">{show.title}</h3>
-                            <span className="text-xs text-white/50">{show.release_date?.split("-")[0] || "N/A"}</span>
+                            <span className="text-xs text-white/50">{show.release_date?.split("-")[0] || "—"}</span>
                           </CardContent>
                         </Card>
                       ))}
@@ -322,7 +335,7 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
                 {watchedBooks.length > 0 && (
                   <div>
                     <h3 className="text-sm font-medium text-white/50 uppercase tracking-wider mb-3 flex items-center gap-2">
-                      <BookOpen className="h-3 w-3" /> Books ({watchedBooks.length})
+                      <BookOpen className="h-3 w-3" /> Livres ({watchedBooks.length})
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {watchedBooks.map((book) => (
@@ -337,12 +350,12 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
                               onClick={() => handleBookClick(book)}
                             />
                             <div className="absolute top-2 right-2 z-10">
-                              <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleWatched(book)}>
+                              <Button variant="ghost" size="icon" className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 w-8 h-8" onClick={() => toggleWatched(book)} aria-label="Marquer comme non lu">
                                 <Eye className="h-4 w-4 text-blue-400" />
                               </Button>
                             </div>
                           </div>
-                          <CardContent className="p-4 cursor-pointer" onClick={() => handleBookClick(book)}>
+                          <CardContent className="p-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60" {...clickableProps(() => handleBookClick(book))}>
                             <h3 className="font-medium text-white line-clamp-2 text-sm">{book.title}</h3>
                           </CardContent>
                         </Card>
@@ -361,23 +374,19 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
         <AlertDialogContent className="bg-black/80 backdrop-blur-md border-white/10 text-white">
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {activeTab === "watched" ? "Clear Watched?" : "Clear All Favorites?"}
+              {clearDialogTitle}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-white/70">
-              This action cannot be undone.
+              Cette action est irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-transparent px-3 border-white/20 hover:bg-black/40 text-white">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="bg-transparent px-3 border-white/20 hover:bg-black/40 text-white">Annuler</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-500/20 px-3 hover:bg-red-500/40 text-white border border-red-500/50"
-              onClick={() => {
-                if (activeTab === "watched") clearAllWatched()
-                else clearAllFavorites()
-                setIsConfirmDialogOpen(false)
-              }}
+              onClick={handleClear}
             >
-              Clear
+              Effacer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -396,7 +405,6 @@ export function FavoritesModal({ isOpen, onClose }: FavoritesModalProps) {
 
       {selectedBook && (
         <BookDetailsModal
-          bookId={selectedBook.id}
           bookTitle={selectedBook.title}
           bookDescription={selectedBook.description}
           bookImageUrl={selectedBook.imageUrl}

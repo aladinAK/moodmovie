@@ -31,42 +31,35 @@ interface WatchProvidersModalProps {
   mediaType?: 'movie' | 'tv'
 }
 
-// Available countries list - only Canada and United States
+// Pays disponibles : Canada et États-Unis
 const countries = [
-  { code: "CA", name: "Canada" },
-  { code: "US", name: "United States" },
+  { code: "CA", name: "Canada", inName: "au Canada" },
+  { code: "US", name: "États-Unis", inName: "aux États-Unis" },
 ]
+
+// URL de redirection par ID de fournisseur TMDB
+const providerURLs: Record<number, string> = {
+  8: "https://www.netflix.com", // Netflix
+  9: "https://www.primevideo.com", // Amazon Prime Video
+  119: "https://www.primevideo.com", // Amazon Prime Video
+  337: "https://www.disneyplus.com", // Disney Plus
+  2: "https://tv.apple.com", // Apple TV Store
+  350: "https://tv.apple.com", // Apple TV
+  283: "https://www.crunchyroll.com", // Crunchyroll
+  230: "https://www.crave.ca", // Crave
+  381: "https://www.canalplus.com", // Canal+
+}
+
+// URL spécifique au fournisseur si connue, sinon la page TMDB du titre
+function getProviderURL(providerId: number, baseURL: string) {
+  return providerURLs[providerId] || baseURL || "https://www.themoviedb.org"
+}
 
 export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen, onClose, mediaType = 'movie' }: WatchProvidersModalProps) {
   const [providers, setProviders] = useState<WatchProviders | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [country, setCountry] = useState("CA") // Canada by default
-
-  // Fonction qui génère l'URL de redirection en fonction du fournisseur
-  const getProviderURL = (providerId: number, baseURL: string) => {
-    // Ces mappings sont basés sur les IDs communs des fournisseurs
-    // Ajouter plus de fournisseurs canadiens/français
-    const providerURLs: Record<number, string> = {
-      8: "https://www.netflix.com", // Netflix
-      9: "https://www.primevideo.com", // Amazon Prime
-      337: "https://www.disneyplus.com", // Disney+
-      2: "https://www.apple.com/apple-tv-plus", // Apple TV+
-      348: "https://www.crunchyroll.com", // Crunchyroll
-      119: "https://www.amazonstudiosguilds.com", // Amazon Prime Video
-      309: "https://crave.ca", // Crave
-      230: "https://www.canalplus.com", // Canal+
-      // Autres fournisseurs pertinents pour le Canada/France
-    };
-    
-    // Si nous avons une URL spécifique pour ce fournisseur, utilisez-la
-    if (providerURLs[providerId]) {
-      return providerURLs[providerId];
-    }
-    
-    // Sinon, utilisez l'URL de base de TMDB
-    return baseURL || "https://www.themoviedb.org";
-  }
+  const [country, setCountry] = useState("CA") // Canada par défaut
 
   useEffect(() => {
     async function fetchProviders() {
@@ -111,13 +104,13 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
           
           setProviders(providerData)
         } else {
-          const countryName = countries.find((c) => c.code === country)?.name || country
-          setError(`No providers available for this movie in ${countryName}`)
+          const countryIn = countries.find((c) => c.code === country)?.inName || country
+          setError(`Aucune plateforme pour ${mediaType === 'tv' ? 'cette série' : 'ce film'} ${countryIn}`)
           setProviders(null)
         }
       } catch (error) {
         console.error("Error fetching providers:", error)
-        setError("Error retrieving providers")
+        setError("Impossible de récupérer les plateformes")
         setProviders(null)
       } finally {
         setLoading(false)
@@ -127,7 +120,7 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
     if (isOpen && movieId) {
       fetchProviders()
     }
-  }, [isOpen, movieId, country])
+  }, [isOpen, movieId, mediaType, country])
 
   const hasProviders =
     providers &&
@@ -139,7 +132,7 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
     setCountry(value)
   }
 
-  const countryName = countries.find((c) => c.code === country)?.name || country
+  const countryIn = countries.find((c) => c.code === country)?.inName || country
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -147,7 +140,7 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
         <DialogHeader>
           <DialogTitle className="text-xl text-white custom-font">{movieTitle}</DialogTitle>
           <DialogDescription className="text-white/60 text-sm">
-            Find where to watch this {mediaType === 'tv' ? 'show' : 'movie'} online
+            Où regarder {mediaType === 'tv' ? 'cette série' : 'ce film'} en ligne
           </DialogDescription>
           
           {/* Synopsis du film */}
@@ -159,10 +152,10 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
         </DialogHeader>
 
         <div className="mb-4">
-          <label className="text-sm font-medium mb-1 block text-white/80">Country</label>
+          <label id="country-label" className="text-sm font-medium mb-1 block text-white/80">Pays</label>
           <Select value={country} onValueChange={handleCountryChange}>
-            <SelectTrigger className="bg-black/30 border-white/20 text-white">
-              <SelectValue placeholder="Select a country" />
+            <SelectTrigger className="bg-black/30 border-white/20 text-white" aria-labelledby="country-label">
+              <SelectValue placeholder="Choisir un pays" />
             </SelectTrigger>
             <SelectContent className="bg-black/90 border-white/10 text-white">
               {countries.map((country) => (
@@ -189,25 +182,25 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
           </div>
         ) : !hasProviders ? (
           <div className="py-6 text-center text-white/50">
-            <p>No providers available in {countryName}</p>
+            <p>Aucune plateforme disponible {countryIn}</p>
           </div>
         ) : (
           <Tabs defaultValue="flatrate" className="w-full">
             <TabsList className="grid w-full grid-cols-3 bg-black/20">
               <TabsTrigger value="flatrate" disabled={!providers?.flatrate?.length}>
-                Streaming
+                Abonnement
               </TabsTrigger>
               <TabsTrigger value="rent" disabled={!providers?.rent?.length}>
-                Rental
+                Location
               </TabsTrigger>
               <TabsTrigger value="buy" disabled={!providers?.buy?.length}>
-                Purchase
+                Achat
               </TabsTrigger>
             </TabsList>
 
             {providers?.flatrate && providers.flatrate.length > 0 && (
               <TabsContent value="flatrate" className="py-4">
-                <h3 className="mb-3 font-medium text-white/80">Available for streaming on:</h3>
+                <h3 className="mb-3 font-medium text-white/80">Disponible en streaming sur :</h3>
                 <div className="flex flex-wrap gap-3">
                   {providers.flatrate.map((provider) => (
                     <a 
@@ -238,7 +231,7 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
 
             {providers?.rent && providers.rent.length > 0 && (
               <TabsContent value="rent" className="py-4">
-                <h3 className="mb-3 font-medium text-white/80">Available for rental on:</h3>
+                <h3 className="mb-3 font-medium text-white/80">Disponible en location sur :</h3>
                 <div className="flex flex-wrap gap-3">
                   {providers.rent.map((provider) => (
                     <a 
@@ -269,7 +262,7 @@ export function WatchProvidersModal({ movieId, movieTitle, movieOverview, isOpen
 
             {providers?.buy && providers.buy.length > 0 && (
               <TabsContent value="buy" className="py-4">
-                <h3 className="mb-3 font-medium text-white/80">Available for purchase on:</h3>
+                <h3 className="mb-3 font-medium text-white/80">Disponible à l&apos;achat sur :</h3>
                 <div className="flex flex-wrap gap-3">
                   {providers.buy.map((provider) => (
                     <a 

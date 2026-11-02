@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server"
 
+// Optionnelle : sans clé, les requêtes partagent le quota anonyme de Google (souvent épuisé → 429)
+const API_KEY = process.env.GOOGLE_BOOKS_API_KEY
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const subject = searchParams.get("subject")
@@ -12,7 +15,14 @@ export async function GET(request: Request) {
 
   try {
     // Construction de l'URL de l'API Google Books — on récupère 40 pour filtrer par rating ensuite
-    const url = `https://www.googleapis.com/books/v1/volumes?q=subject:${subject}&maxResults=40&startIndex=${startIndex}&orderBy=${orderBy}`
+    const params = new URLSearchParams({
+      q: `subject:${subject}`,
+      maxResults: "40",
+      startIndex,
+      orderBy,
+    })
+    if (API_KEY) params.set("key", API_KEY)
+    const url = `https://www.googleapis.com/books/v1/volumes?${params}`
     
     const response = await fetch(url, {
       cache: "no-store",

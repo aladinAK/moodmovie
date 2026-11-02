@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { ChevronUp } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, prefersReducedMotion } from "@/lib/utils"
+import { useMusicPlayer } from "@/context/music-player-context"
 
 export function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false)
+  const { currentTrack } = useMusicPlayer()
 
   // Fonction qui détecte quand afficher le bouton
   const toggleVisibility = () => {
@@ -20,7 +22,7 @@ export function ScrollToTop() {
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: "smooth"
+      behavior: prefersReducedMotion() ? "auto" : "smooth"
     })
   }
 
@@ -34,6 +36,8 @@ export function ScrollToTop() {
       onClick={scrollToTop}
       className={cn(
         "fixed right-5 bottom-5 p-3 rounded-full z-50",
+        // Sur mobile, le mini-player occupe toute la largeur en bas : on remonte le bouton au-dessus
+        currentTrack && "max-sm:bottom-28",
         "backdrop-blur-md shadow-glow border border-white/20",
         "transition-all duration-300 ease-in-out",
         "hover:bg-white/20 hover:scale-110",

@@ -1,6 +1,0 @@
-# Allow all crawlers
-User-agent: *
-Allow: /
-
-# Sitemap URL
-Sitemap: https://moodmovie.ca/sitemap.xml

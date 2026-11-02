@@ -2,18 +2,15 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Movie } from "@/types/movie"
-import { getFavorites, toggleFavorite as toggleFavoriteUtil } from '@/lib/favorites';
+import { getFavorites, toggleFavorite as toggleFavoriteUtil, removeManyFromFavorites } from '@/lib/favorites';
 
 // Définir le type du contexte
 interface FavoritesContextType {
   favorites: Movie[];
   isFavorite: (movieId: number) => boolean;
   toggleFavorite: (movie: Movie) => void;
-  clearAllFavorites: () => void;  // Ajout de la fonction pour effacer tous les favoris
+  removeFavorites: (ids: number[]) => void;
 }
-
-// Constante pour la clé de stockage local
-const FAVORITES_KEY = 'moodmovie_favorites';
 
 // Créer le contexte avec une valeur initiale undefined
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
@@ -23,8 +20,10 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   // État local pour stocker les favoris
   const [favorites, setFavorites] = useState<Movie[]>([]);
 
-  // Charger les favoris depuis localStorage au montage du composant
+  // Charger les favoris depuis localStorage au montage du composant.
+  // Lecture après hydratation volontaire : le rendu serveur n'a pas accès à localStorage.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFavorites(getFavorites());
   }, []);
 
@@ -46,14 +45,11 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Fonction pour effacer tous les favoris
-  const clearAllFavorites = useCallback(() => {
-    // Vider localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(FAVORITES_KEY);
-    }
-    // Mettre à jour l'état
-    setFavorites([]);
+  // Fonction pour retirer plusieurs favoris (ex. tous les livres)
+  const removeFavorites = useCallback((ids: number[]) => {
+    removeManyFromFavorites(ids);
+    const idSet = new Set(ids);
+    setFavorites(prev => prev.filter(m => !idSet.has(m.id)));
   }, []);
 
   // Fournir le contexte avec ses valeurs
@@ -63,7 +59,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         favorites, 
         isFavorite, 
         toggleFavorite: handleToggleFavorite,
-        clearAllFavorites
+        removeFavorites
       }}
     >
       {children}

@@ -7,7 +7,7 @@ import { FavoritesProvider } from '@/context/favorites-context'
 import { WatchedProvider } from '@/context/watched-context'
 import { MusicPlayerProvider } from '@/context/music-player-context'
 import { MusicMiniPlayer } from '@/components/music-mini-player'
-
+import { BASE_URL } from '@/lib/site'
 
 import "./globals.css";
 
@@ -28,8 +28,6 @@ export const viewport: Viewport = {
     { media: '(prefers-color-scheme: dark)', color: '#1E1E1E' },
   ],
 };
-const BASE_URL = 'https://moodmovie-by-aladin-akkari.vercel.app'
-
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
@@ -38,7 +36,7 @@ export const metadata: Metadata = {
   },
   description: "Découvre des films, séries TV, livres et musique adaptés à ton humeur du moment. Joie, tristesse, peur, colère, surprise — laisse tes émotions guider tes découvertes.",
   keywords: [
-    'film selon humeur', 'recommendation film', 'série TV mood', 'découverte film',
+    'film selon humeur', 'recommandation film', 'série TV mood', 'découverte film',
     'film comédie joie', 'film drame tristesse', 'film horreur peur', 'film action colère',
     'livre selon humeur', 'musique selon humeur', 'recommandation personnalisée',
     'mood movie', 'film recommendation', 'what to watch', 'quoi regarder',
@@ -94,7 +92,7 @@ export default function RootLayout({
             "@context": "https://schema.org",
             "@type": "WebApplication",
             "name": "MoodMovie",
-            "url": "https://moodmovie-by-aladin-akkari.vercel.app",
+            "url": BASE_URL,
             "description": "Découvre des films, séries TV, livres et musique adaptés à ton humeur du moment.",
             "applicationCategory": "EntertainmentApplication",
             "operatingSystem": "Web",

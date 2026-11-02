@@ -8,10 +8,6 @@ const nextConfig = {
         pathname: '/t/p/**',
       },
       {
-        protocol: 'https',
-        hostname: 'placehold.co',
-      },
-      {
         protocol: 'http',
         hostname: 'books.google.com',
         pathname: '/books/content/**',

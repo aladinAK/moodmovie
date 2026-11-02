@@ -1,6 +1,5 @@
 import { MetadataRoute } from 'next'
-
-const BASE_URL = 'https://moodmovie-by-aladin-akkari.vercel.app'
+import { BASE_URL } from '@/lib/site'
 
 const moodSlugs = ['joie', 'tristesse', 'choc', 'peur', 'energie', 'surprise']
 

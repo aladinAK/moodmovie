@@ -15,5 +15,6 @@ export interface Movie {
     vote_count?: number;
     adult?: boolean;
     original_title?: string;
-    media_type?: 'movie' | 'show';
+    // Seules les séries sont marquées ; un film n'a pas de media_type
+    media_type?: 'show';
   }

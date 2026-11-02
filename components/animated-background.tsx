@@ -1,100 +1,94 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { prefersReducedMotion } from "@/lib/utils"
+
+interface Particle {
+  x: number
+  y: number
+  size: number
+  speedX: number
+  speedY: number
+  opacity: number
+}
+
+const PARTICLE_COUNT = 100
+
+function createParticle(width: number, height: number): Particle {
+  return {
+    x: Math.random() * width,
+    y: Math.random() * height,
+    size: Math.random() * 2 + 0.1,
+    speedX: Math.random() * 0.5 - 0.25,
+    speedY: Math.random() * 0.5 - 0.25,
+    opacity: Math.random() * 0.5 + 0.1,
+  }
+}
 
 export function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    
+
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    
+
     // Faire correspondre la taille du canvas à la fenêtre
     const resizeCanvas = () => {
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
     }
-    
-    window.addEventListener('resize', resizeCanvas)
+
     resizeCanvas()
-    
+
     // Création des particules
-    const particles: Particle[] = []
-    const particleCount = 100
-    
-    class Particle {
-      x: number
-      y: number
-      size: number
-      speedX: number
-      speedY: number
-      opacity: number
-      
-      constructor() {
-        // Utiliser l'opérateur d'assertion non-null (!) pour garantir à TypeScript que canvas n'est pas null
-        this.x = Math.random() * canvas!.width
-        this.y = Math.random() * canvas!.height
-        this.size = Math.random() * 2 + 0.1
-        this.speedX = Math.random() * 0.5 - 0.25
-        this.speedY = Math.random() * 0.5 - 0.25
-        this.opacity = Math.random() * 0.5 + 0.1
-      }
-      
-      update() {
-        this.x += this.speedX
-        this.y += this.speedY
-        
-        // Protection supplémentaire contre les erreurs TypeScript
-        if (!canvas) return;
-        
-        // Vérification des limites du canvas
-        if (this.x > canvas.width || this.x < 0) {
-          this.x = Math.random() * canvas.width
-        }
-        if (this.y > canvas.height || this.y < 0) {
-          this.y = Math.random() * canvas.height
-        }
-      }
-      
-      draw() {
-        if (!ctx) return;
-        
-        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`
+    const particles = Array.from({ length: PARTICLE_COUNT }, () => createParticle(canvas.width, canvas.height))
+
+    let frameId = 0
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      for (const p of particles) {
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`
         ctx.beginPath()
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
         ctx.fill()
       }
     }
-    
-    // Initialiser les particules
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle())
-    }
-    
+
     // Fonction d'animation
     const animate = () => {
-      if (!canvas || !ctx) return;
-      
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      
-      for (let i = 0; i < particles.length; i++) {
-        particles[i].update()
-        particles[i].draw()
+      for (const p of particles) {
+        p.x += p.speedX
+        p.y += p.speedY
+
+        // Vérification des limites du canvas
+        if (p.x > canvas.width || p.x < 0) p.x = Math.random() * canvas.width
+        if (p.y > canvas.height || p.y < 0) p.y = Math.random() * canvas.height
       }
-      
-      requestAnimationFrame(animate)
+      draw()
+      frameId = requestAnimationFrame(animate)
     }
-    
-    animate()
-    
+
+    // « Réduire les animations » activé : particules affichées sans mouvement
+    const reduceMotion = prefersReducedMotion()
+    const onResize = () => {
+      resizeCanvas()
+      if (reduceMotion) draw()
+    }
+    window.addEventListener('resize', onResize)
+
+    if (reduceMotion) draw()
+    else animate()
+
     return () => {
-      window.removeEventListener('resize', resizeCanvas)
+      cancelAnimationFrame(frameId)
+      window.removeEventListener('resize', onResize)
     }
   }, [])
-  
+
   return (
     <canvas
       ref={canvasRef}

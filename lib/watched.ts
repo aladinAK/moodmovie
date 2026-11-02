@@ -13,10 +13,6 @@ export function getWatched(): Movie[] {
   }
 }
 
-export function isWatched(id: number): boolean {
-  return getWatched().some(item => item.id === id)
-}
-
 export function toggleWatched(item: Movie): boolean {
   const watched = getWatched()
   const already = watched.some(w => w.id === item.id)

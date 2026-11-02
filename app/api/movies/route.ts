@@ -19,9 +19,19 @@ export async function GET(request: Request) {
 
   const today = new Date().toISOString().split('T')[0];
 
+  const params = new URLSearchParams({
+    api_key: API_KEY,
+    with_genres: genreId,
+    language: "fr-FR",
+    sort_by: sort,
+    page,
+    "vote_average.gte": "6",
+    "release_date.lte": today,
+  })
+
   try {
     const response = await fetch(
-      `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=fr-FR&sort_by=${sort}&page=${page}&vote_average.gte=6&release_date.lte=${today}`,
+      `https://api.themoviedb.org/3/discover/movie?${params}`,
       { cache: "no-store" },
     )
 
